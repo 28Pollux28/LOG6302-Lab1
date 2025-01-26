@@ -1,4 +1,4 @@
-module log6302-lab1
+module github.com/28Pollux28/log6302-parser
 
 go 1.23
 
