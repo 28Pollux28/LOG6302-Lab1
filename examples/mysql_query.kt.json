@@ -1,0 +1,14 @@
+{
+  "kind": "function_call_expression",
+  "children": [
+    {
+      "kind": "name",
+      "attributes": {
+        "text": "mysql_query"
+      }
+    },
+    {
+      "kind": "arguments"
+    }
+  ]
+}

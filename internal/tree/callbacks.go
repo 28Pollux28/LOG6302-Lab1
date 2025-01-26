@@ -10,7 +10,7 @@ func (n *Node) CountKinds(kinds []string) map[string]int {
 	return results[0].(map[string]int)
 }
 
-func (n *Node) countKind(kind string) func(n *Node, result []interface{}) []interface{} {
+func (n *Node) countKind(kind string) VisitorFunc {
 	return func(n *Node, result []interface{}) []interface{} {
 		// Count by increasing an integer
 		count := 0
@@ -24,7 +24,7 @@ func (n *Node) countKind(kind string) func(n *Node, result []interface{}) []inte
 	}
 }
 
-func (n *Node) countKinds(kinds []string) func(n *Node, result []interface{}) []interface{} {
+func (n *Node) countKinds(kinds []string) VisitorFunc {
 	return func(n *Node, result []interface{}) []interface{} {
 		countMap := make(map[string]int)
 		for _, r := range result {
@@ -38,5 +38,27 @@ func (n *Node) countKinds(kinds []string) func(n *Node, result []interface{}) []
 			}
 		}
 		return []interface{}{countMap}
+	}
+}
+
+func (n *Node) FindKindTree(kindtree KindTree) []*Node {
+	results := n.WalkPostfixWithCallback(n.findKindTree(kindtree))
+	nodes := make([]*Node, len(results))
+	for i, r := range results {
+		nodes[i] = r.(*Node)
+	}
+	return nodes
+}
+
+func (n *Node) findKindTree(kindtree KindTree) VisitorFunc {
+	return func(n *Node, result []interface{}) []interface{} {
+		if result == nil {
+			result = []interface{}{}
+		}
+		// Try to find nodes that match the kind tree attributes
+		if kindtree.Match(n) {
+			return append(result, n)
+		}
+		return result
 	}
 }

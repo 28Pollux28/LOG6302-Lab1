@@ -62,6 +62,7 @@ func NewTreeNode(node *ts.Node, source *[]byte) *Node {
 		Node:           node,
 		Parent:         nil,
 		Descendants:    []*Node{},
+		Attributes:     make(map[string]Attribute[any]),
 	}
 }
 
@@ -87,12 +88,4 @@ func (n *Node) printTree(level int) {
 
 func (n *Node) String() string {
 	return fmt.Sprintf("ID: %d, Kind: %s, GrammarName: %s, IsNamed: %t, IsExtra: %t, HasChanges: %t, HasError: %t, IsError: %t, ParseState: %d, NextParseState: %d, IsMissing: %t, StartByte: %d, EndByte: %d, StartPosition: %v, EndPosition: %v, Text: %s", n.ID, n.Kind, n.GrammarName, n.IsNamed, n.IsExtra, n.HasChanges, n.HasError, n.IsError, n.ParseState, n.NextParseState, n.IsMissing, n.StartByte, n.EndByte, n.StartPosition, n.EndPosition, n.Text)
-}
-
-func (n *Node) WalkPostfixWithCallback(callback func(n *Node, result []interface{}) []interface{}) []interface{} {
-	var results []interface{}
-	for _, child := range n.Descendants {
-		results = append(results, child.WalkPostfixWithCallback(callback)...)
-	}
-	return callback(n, results)
 }

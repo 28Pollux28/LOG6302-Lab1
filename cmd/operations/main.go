@@ -19,6 +19,7 @@ func Main(args []string) {
 		fmt.Println("Operations:")
 		fmt.Println("  count-kind - Count the number of nodes of a specific kind")
 		fmt.Println("  count-kinds - Count the number of nodes of multiple kinds")
+		fmt.Println("  find-kind-tree - Find the tree of nodes of a specific kind")
 		os.Exit(0)
 	}
 
@@ -33,6 +34,8 @@ func Main(args []string) {
 		countKind(fileName, operationsCmd.Args())
 	case "count-kinds":
 		countKinds(fileName, operationsCmd.Args())
+	case "find-kind-tree":
+		findKindTree(fileName, operationsCmd.Args())
 	default:
 		fmt.Println("Please provide a valid operation. Type --help for more information")
 		os.Exit(1)
