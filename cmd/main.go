@@ -35,7 +35,7 @@ func Main() {
 	args := flag.Args()
 	switch os.Args[1] {
 	case "parse":
-		parsePHPFile(args)
+		parsePHP(args)
 	case "show":
 		showTree(args)
 	case "operations":
