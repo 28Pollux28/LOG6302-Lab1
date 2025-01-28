@@ -62,3 +62,23 @@ func (n *Node) findKindTree(kindtree KindTree) VisitorFunc {
 		return result
 	}
 }
+
+func (n *Node) FindKindTrees(kindTreeMap map[string]KindTree) map[string][]*Node {
+	results := n.WalkPostfixWithCallback(n.findKindTrees(kindTreeMap))[0]
+	return results.(map[string][]*Node)
+}
+
+func (n *Node) findKindTrees(kindTreeMap map[string]KindTree) VisitorFunc {
+	return func(n *Node, result []interface{}) []interface{} {
+		if result == nil {
+			result = []interface{}{make(map[string][]*Node)}
+		}
+		matchedMap := result[0].(map[string][]*Node)
+		for k, kt := range kindTreeMap {
+			if kt.Match(n) {
+				matchedMap[k] = append(matchedMap[k], n)
+			}
+		}
+		return result
+	}
+}

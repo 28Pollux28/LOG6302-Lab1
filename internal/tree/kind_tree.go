@@ -5,6 +5,7 @@ type KindTreeAttributes struct {
 }
 
 type KindTree struct {
+	Name       string              `json:"name"`
 	Kind       string              `json:"kind"`
 	Attributes *KindTreeAttributes `json:"attributes"`
 	Children   []*KindTree         `json:"children"`
