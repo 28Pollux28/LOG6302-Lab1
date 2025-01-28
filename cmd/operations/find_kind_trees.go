@@ -86,6 +86,11 @@ func findKindTrees(fileName string, args []string) {
 
 	// Find kind tree in tree
 	foundNodesMap := treeNode.FindKindTrees(kindTrees)
+	if len(foundNodesMap) == 0 {
+		fmt.Println("No nodes found")
+		os.Exit(0)
+	}
+	fmt.Println("Results:")
 	for key, nodesArray := range foundNodesMap {
 		fmt.Printf("Found occurences for %s : \n", key)
 		for _, node := range nodesArray {

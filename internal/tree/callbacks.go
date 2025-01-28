@@ -63,22 +63,30 @@ func (n *Node) findKindTree(kindtree KindTree) VisitorFunc {
 	}
 }
 
+// FindKindTrees finds nodes that match the kind tree map provided
+// Returns a map with the kindtree map entry as key and the nodes that match as value
 func (n *Node) FindKindTrees(kindTreeMap map[string]KindTree) map[string][]*Node {
 	results := n.WalkPostfixWithCallback(n.findKindTrees(kindTreeMap))[0]
 	return results.(map[string][]*Node)
 }
 
+// A bit more complicated since we have to deal with maps instead of a single slice
+// We have to merge the maps from the results (got them from our childs) and then append the nodes that match the kind tree
 func (n *Node) findKindTrees(kindTreeMap map[string]KindTree) VisitorFunc {
 	return func(n *Node, result []interface{}) []interface{} {
-		if result == nil {
-			result = []interface{}{make(map[string][]*Node)}
-		}
-		matchedMap := result[0].(map[string][]*Node)
-		for k, kt := range kindTreeMap {
-			if kt.Match(n) {
-				matchedMap[k] = append(matchedMap[k], n)
+		// Merge Maps from result
+		foundNodesMap := make(map[string][]*Node)
+		for _, r := range result {
+			for k, v := range r.(map[string][]*Node) {
+				foundNodesMap[k] = append(foundNodesMap[k], v...)
 			}
 		}
-		return result
+		// Try to find nodes that match the kind tree attributes
+		for kind, kindTree := range kindTreeMap {
+			if kindTree.Match(n) {
+				foundNodesMap[kind] = append(foundNodesMap[kind], n)
+			}
+		}
+		return []interface{}{foundNodesMap}
 	}
 }
