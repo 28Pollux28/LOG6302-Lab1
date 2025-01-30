@@ -1,0 +1,14 @@
+{
+  "kind": "function_call_expression",
+  "children": [
+    {
+      "kind": "name",
+      "attributes": {
+        "text": "mysqli_query"
+      }
+    },
+    {
+      "kind": "arguments"
+    }
+  ]
+}

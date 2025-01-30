@@ -26,5 +26,59 @@
         "kind": "arguments"
       }
     ]
+  },
+  "statement-execute": {
+    "kind": "member_call_expression",
+    "children": [
+      {
+        "kind": "variable_name"
+      },
+      {
+        "kind": "-\u003e"
+      },
+      {
+        "kind": "name",
+        "attributes": {
+          "text": "execute"
+        }
+      },
+      {
+        "kind": "arguments"
+      }
+    ]
+  },
+  "mysql-exec": {
+    "kind": "member_call_expression",
+    "children": [
+      {
+        "kind": "member_access_expression",
+        "children": [
+          {
+            "kind": "variable_name"
+          },
+          {
+            "kind": "-\u003e"
+          },
+          {
+            "kind": "name",
+            "attributes": {
+              "text": "mysql"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "-\u003e"
+      },
+      {
+        "kind": "name",
+        "attributes": {
+          "text": "exec"
+        }
+      },
+      {
+        "kind": "arguments"
+      }
+    ]
   }
 }
