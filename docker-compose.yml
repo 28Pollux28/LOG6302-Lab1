@@ -1,0 +1,11 @@
+services:
+  cli:
+    build: .
+    image: my-go-cli
+    container_name: my-go-cli-container
+    volumes:
+      - ./data:/data
+    working_dir: /data
+    stdin_open: true
+    tty: true
+    command: ["bash"]
