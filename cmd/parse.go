@@ -9,6 +9,7 @@ import (
 	tree_sitter_php "github.com/tree-sitter/tree-sitter-php/bindings/go"
 	"os"
 	"path"
+	"sync"
 )
 
 func parsePHP(args []string) {
@@ -44,7 +45,9 @@ func parsePHP(args []string) {
 		os.Exit(1)
 	}
 	if stat.IsDir() && *directory {
-		parseDir(fileName, *outputFile, *recursive, *prettyPrint)
+		var wg sync.WaitGroup
+		parseDir(fileName, *outputFile, *recursive, *prettyPrint, &wg)
+		wg.Wait()
 		os.Exit(0)
 	}
 
@@ -57,7 +60,7 @@ func parsePHP(args []string) {
 	os.Exit(0)
 }
 
-func parseDir(directory, output string, recursive, prettyPrint bool) {
+func parseDir(directory, output string, recursive, prettyPrint bool, wg *sync.WaitGroup) {
 	// Read all files in directory
 	files, err := os.ReadDir(directory)
 	if err != nil {
@@ -66,21 +69,23 @@ func parseDir(directory, output string, recursive, prettyPrint bool) {
 	}
 	for _, file := range files {
 		if file.IsDir() && recursive {
-			parseDir(directory+"/"+file.Name(), output+"/"+file.Name(), recursive, prettyPrint)
+			parseDir(directory+"/"+file.Name(), output+"/"+file.Name(), recursive, prettyPrint, wg)
 		} else if file.IsDir() && !recursive {
 			continue
 		}
 		if path.Ext(file.Name()) != ".php" {
-			fmt.Printf("Skipping file %s: not a PHP file\n", file.Name())
 			continue
 		}
-		fmt.Printf("Parsing file %s\n", directory+"/"+file.Name())
 		filePHP, err := os.ReadFile(directory + "/" + file.Name())
 		if err != nil {
 			fmt.Printf("Error reading file %s: %v\n", file.Name(), err)
 			os.Exit(1)
 		}
-		parseFile(filePHP, output+"/"+file.Name()+".ast.json", prettyPrint)
+		wg.Add(1)
+		go func(filePHP []byte, outputFile string) {
+			defer wg.Done()
+			parseFile(filePHP, outputFile, prettyPrint)
+		}(filePHP, output+"/"+file.Name()+".ast.json")
 	}
 }
 
@@ -95,13 +100,7 @@ func parseFile(filePHP []byte, outputFile string, prettyPrint bool) {
 	root := treesitterTree.RootNode()
 
 	treeNode := tree.WalkTreeSitterTree(root, &filePHP)
-	// write to json file
-	var jsonTree []byte
-	if prettyPrint {
-		jsonTree, _ = json.MarshalIndent(treeNode, "", "\t")
-	} else {
-		jsonTree, _ = json.Marshal(treeNode)
-	}
+
 	dir := path.Dir(outputFile)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		err = os.MkdirAll(dir, 0666)
@@ -110,21 +109,19 @@ func parseFile(filePHP []byte, outputFile string, prettyPrint bool) {
 			os.Exit(1)
 		}
 	}
-	file, err := os.Create(outputFile)
+	file, err := os.OpenFile(outputFile, os.O_CREATE|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		fmt.Printf("Error creating file: %v\n", err)
 		os.Exit(1)
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-	}(file)
-	_, err = file.Write(jsonTree)
+	defer file.Close()
+	encoder := json.NewEncoder(file)
+	if prettyPrint {
+		encoder.SetIndent("", "\t")
+	}
+	err = encoder.Encode(treeNode)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Error encoding JSON: %v\n", err)
 		os.Exit(1)
 	}
 }

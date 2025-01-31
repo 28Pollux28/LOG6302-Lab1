@@ -15,8 +15,6 @@ func walkFromNode(node *ts.Node, parentTreeNode *Node, source *[]byte) *Node {
 		selfTreeNode.Parent = parentTreeNode
 		parentTreeNode = selfTreeNode
 	}
-	walk := node.Walk()
-	defer walk.Close()
 
 	for i := 0; i < int(node.ChildCount()); i++ {
 		child := node.Child(uint(i))
