@@ -16,7 +16,7 @@ func findKindTree(fileName string, args []string) {
 
 	if *findKindTreeHelp {
 		// Print help message
-		fmt.Println("Usage: ./main operations [flags] file.json find-kind-tree [flags] <kind-tree.json>")
+		fmt.Println("Usage: ./main operations [flags] file.ast.json find-kind-tree [flags] <kind-tree.kt.json>")
 		fmt.Println("Flags:")
 		fmt.Println("  --help - Show help for the find-kind-tree operation")
 		fmt.Println(" <kind-tree.json> - The kind tree to find in the tree")

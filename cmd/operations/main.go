@@ -13,7 +13,7 @@ func Main(args []string) {
 	operationsCmd.Parse(args[1:])
 
 	if *help {
-		fmt.Println("Usage: ./main operations [flags] file.json <operation> [operation_flags]")
+		fmt.Println("Usage: ./main operations [flags] file.ast.json <operation> [operation_flags]")
 		fmt.Println("Flags:")
 		fmt.Println("  --help - Show help for the operations command")
 		fmt.Println("Operations:")

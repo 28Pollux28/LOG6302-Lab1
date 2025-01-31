@@ -14,7 +14,7 @@ func countKinds(fileName string, args []string) {
 	countKindsOperation.Parse(args[2:])
 
 	if *countKindsHelp {
-		fmt.Println("Usage: ./main operations [flags] file.json count-kinds [flags] <kind1> <kind2> ...")
+		fmt.Println("Usage: ./main operations [flags] file.ast.json count-kinds [flags] <kind1> <kind2> ...")
 		fmt.Println("Flags:")
 		fmt.Println("  --help - Show help for the count-kinds operation")
 		fmt.Println(" <kind1> <kind2> ... - The kinds of nodes to count. Refer to the PHP tree-sitter grammar for the kinds")
