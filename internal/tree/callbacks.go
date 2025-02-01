@@ -33,6 +33,10 @@ func (n *Node) countKinds(kinds []string) VisitorFunc {
 			}
 		}
 		for _, kind := range kinds {
+			// if kind is not in the map, set it to 0
+			if _, ok := countMap[kind]; !ok {
+				countMap[kind] = 0
+			}
 			if n.Kind == kind {
 				countMap[kind]++
 			}
