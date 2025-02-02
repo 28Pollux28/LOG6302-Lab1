@@ -22,7 +22,7 @@ func parsePHP(args []string) {
 	parseCmd.Parse(args[1:])
 
 	if *parseHelp {
-		fmt.Println("Usage: ./main parse [flags] <file.php|directory>")
+		fmt.Println("Usage: ./go-php-parser parse [flags] <file.php|directory>")
 		fmt.Println("Flags:")
 		fmt.Println("  --output - The output JSON file / directory")
 		fmt.Println("  --pretty - Pretty print the JSON output")

@@ -28,7 +28,7 @@ func (kt *KindTree) AddChildTree(child *KindTree) {
 }
 
 func (kt *KindTree) Match(n *Node) bool {
-	if n.Attributes != nil && n.Attributes["matched"].V == true {
+	if n.Attributes != nil && n.Attributes[kt.Name+"matched"].V == true {
 		return false
 	}
 	if n.Kind != kt.Kind {
@@ -42,7 +42,7 @@ func (kt *KindTree) Match(n *Node) bool {
 		for _, descendant := range n.Descendants {
 			if child.Match(descendant) {
 				found = true
-				descendant.Attributes["matched"] = Attribute[any]{V: true}
+				descendant.Attributes[kt.Name+"matched"] = Attribute[any]{V: true}
 				break
 			}
 		}

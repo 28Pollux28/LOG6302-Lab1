@@ -5,10 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/utils"
 	"os"
+	"sync"
 )
 
-func findKindTrees(fileName string, args []string) {
+func findKindTrees(fileName string, args []string, directory, recursive bool) {
 	// Define the flags for the find-kind-tree operation
 	findKindTreesOperation := flag.NewFlagSet("find-kind-tree", flag.ExitOnError)
 	findKindTreesHelp := findKindTreesOperation.Bool("help", false, "Show help for the find-kind-tree operation")
@@ -16,7 +18,7 @@ func findKindTrees(fileName string, args []string) {
 
 	if *findKindTreesHelp {
 		// Print help message
-		fmt.Println("Usage: ./main operations [flags] file.ast.json find-kind-trees [flags] <kind-trees.kt.json>")
+		fmt.Println("Usage: go-php-parser operations [OPFlags] <file.ast.json|directory> find-kind-trees [flags] <kind-trees.kt.json>")
 		fmt.Println("Flags:")
 		fmt.Println("  --help - Show help for the find-kind-tree operation")
 		fmt.Println(" <kind-trees.json> - The kind trees to find in the tree")
@@ -57,6 +59,52 @@ func findKindTrees(fileName string, args []string) {
 		os.Exit(1)
 	}
 
+	kindTrees := make(map[string]tree.KindTree)
+	kindTreesJSON, err := os.ReadFile(findKindTreesOperation.Args()[0])
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = json.Unmarshal(kindTreesJSON, &kindTrees)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	if directory {
+		var wg sync.WaitGroup
+		findKindTreesDir(fileName, kindTrees, recursive, &wg)
+		wg.Wait()
+		return
+	}
+	findKindTreesFile(fileName, kindTrees)
+}
+
+func findKindTreesDir(directory string, kindTrees map[string]tree.KindTree, recursive bool, wg *sync.WaitGroup) {
+	// Read all files in directory
+	files, err := os.ReadDir(directory)
+	if err != nil {
+		fmt.Printf("Error reading directory: %v\n", err)
+		os.Exit(1)
+	}
+	for _, file := range files {
+		if file.IsDir() && recursive {
+			findKindTreesDir(directory+"/"+file.Name(), kindTrees, recursive, wg)
+		} else if file.IsDir() {
+			continue
+		}
+		if utils.FileExtension(file.Name(), 2) != ".ast.json" {
+			continue
+		}
+		wg.Add(1)
+		go func(fileName string, kindTrees map[string]tree.KindTree) {
+			defer wg.Done()
+			findKindTreesFile(fileName, kindTrees)
+		}(directory+"/"+file.Name(), kindTrees)
+	}
+}
+
+func findKindTreesFile(fileName string, kindTrees map[string]tree.KindTree) {
 	// Load file
 	fileJSON, err := os.ReadFile(fileName)
 	if err != nil {
@@ -66,29 +114,14 @@ func findKindTrees(fileName string, args []string) {
 	var treeNode tree.Node
 	err = json.Unmarshal(fileJSON, &treeNode)
 	if err != nil {
-		fmt.Printf("Error parsing tree: %s\n", err)
-		os.Exit(1)
-	}
-
-	// Load kind tree
-	kindTreeJSON, err := os.ReadFile(findKindTreesOperation.Args()[0])
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	var kindTrees map[string]tree.KindTree
-	err = json.Unmarshal(kindTreeJSON, &kindTrees)
-	if err != nil {
-		fmt.Printf("Error parsing kind tree: %s\n", err)
+		fmt.Printf("Error parsing tree in file %s : %s\n", fileName, err)
 		os.Exit(1)
 	}
 
 	// Find kind tree in tree
 	foundNodesMap := treeNode.FindKindTrees(kindTrees)
 	if len(foundNodesMap) == 0 {
-		fmt.Println("No nodes found")
-		os.Exit(0)
+		return
 	}
 	fmt.Println("Results:")
 	for key, nodesArray := range foundNodesMap {
@@ -98,5 +131,4 @@ func findKindTrees(fileName string, args []string) {
 		}
 		fmt.Print("----------------------\n")
 	}
-
 }

@@ -16,7 +16,7 @@ func Main() {
 	flag.Parse()
 
 	if *mainHelp {
-		fmt.Println("Usage: ./main [command] [flags]")
+		fmt.Println("Usage: go-php-parser [command] [flags]")
 		fmt.Println("Commands:")
 		fmt.Println("  parse - Parse a PHP file and output a JSON file with the tree")
 		fmt.Println("  show - Show the tree of a JSON file")

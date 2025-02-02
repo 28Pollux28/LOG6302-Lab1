@@ -20,7 +20,7 @@ Multiple analysis can be done on the AST JSON file to extract information about 
 The parser can be used as a CLI tool. The following commands are available:
 - `parse` : Parse a php file and generate an AST JSON file. Command: `go-php-parser parse <path-to-php-file>`. Consult `go-php-parser parse --help` for more information.
 - `operations` : Perform operations on the AST JSON file. Command: `go-php-parser operations <path-to-ast-json-file>`. Consult `go-php-parser operations --help` for more information.
-
+- `show` : Display the AST JSON file in a tree format. Command: `go-php-parser show <path-to-ast-json-file>`. Consult `go-php-parser show --help` for more information.
 
 ## Examples
 ### Parse
@@ -43,13 +43,14 @@ go-php-parser parse --output ./output/directory --directory --recursive ./data
 #### count-kind
 ```bash
 # Count the number of nodes of a specific kind in the AST JSON file/directory
+# Use --directory to specify a directory instead of a file and --recursive to search recursively in the directory
 go-php-parser operations ./output/file.ast.json count-kind "kind"
-go-php-parser operations --recursive ./output/directory count-kind "kind"
+go-php-parser operations --directory --recursive ./data/directory count-kind "kind"
 ```
 You can also specify multiple kinds to count with the count-kinds operation :
 ```bash
 go-php-parser operations ./output/file.ast.json count-kinds "kind1" "kind2" "kind3"
-go-php-parser operations --recursive ./output/directory count-kinds "kind1" "kind2" "kind3"
+go-php-parser operations --directory --recursive ./data/directory count-kinds "kind1" "kind2" "kind3"
 ```
 
 #### find-kind-tree
@@ -100,9 +101,15 @@ Example Kind trees are available in the `examples` directory.
 To use the find-kind-tree operation, you can use the following commands:
 ```bash
 # Find all the trees in the AST JSON file that match the provided kind tree
-go-php-parser operations ./output/file.ast.json find-kind-tree "<kind-tree.kt.json>"
+# Use --directory to specify a directory instead of a file and --recursive to search recursively in the directory
+go-php-parser operations ./output/file.ast.json find-kind-tree <kind-tree.kt.json>
+go-php-parser operations --directory --recursive ./output/file.ast.json find-kind-tree ./data/directory
+```
+```bash
 # Find all the trees in the AST JSON file that match any of the provided kind trees
-go-php-parser operations ./output/file.ast.json find-kind-trees "<kind-trees.kt.json>"
+# Use --directory to specify a directory instead of a file and --recursive to search recursively in the directory
+go-php-parser operations ./output/file.ast.json find-kind-trees <kind-trees.kt.json>
+go-php-parser operations --directory --recursive ./data/directory find-kind-trees <kind-trees.kt.json>
 ```
 
 ## Contributors

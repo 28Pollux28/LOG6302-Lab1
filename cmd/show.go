@@ -14,7 +14,8 @@ func showTree(args []string) {
 	showCmd.Parse(args[1:])
 
 	if *showHelp {
-		fmt.Println("Usage: ./main show [flags] file.json")
+		fmt.Println("Displays the tree of a AST file")
+		fmt.Println("Usage: go-php-parser show [flags] file.ast.json")
 		fmt.Println("Flags:")
 		fmt.Println("  --help - Show help for the show command") //TODO: Add flags to specify which fields to show in the tree
 		os.Exit(0)

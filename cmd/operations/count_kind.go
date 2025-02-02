@@ -5,21 +5,20 @@ import (
 	"flag"
 	"fmt"
 	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/utils"
 	"os"
 	"sync"
 )
 
-func countKind(fileName string, args []string) {
+func countKind(fileName string, args []string, directory, recursive bool) {
 	countKindOperation := flag.NewFlagSet("count-kind", flag.ExitOnError)
 	countKindHelp := countKindOperation.Bool("help", false, "Show help for the count-kind operation")
-	countKindRecursive := countKindOperation.Bool("recursive", false, "Recursively count the kind in a directory of AST trees")
 	countKindOperation.Parse(args[2:])
 
 	if *countKindHelp {
-		fmt.Println("Usage: ./main operations [flags] file.ast.json count-kind [flags] <kind>")
+		fmt.Println("Usage: go-php-parser operations <file.ast.json|directory> count-kind [flags] <kind>")
 		fmt.Println("Flags:")
 		fmt.Println("  --help - Show help for the count-kind operation")
-		fmt.Println("  --recursive - Recursively count the kind in a directory of AST trees")
 		fmt.Println("  <kind> - The kind of node to count. Refer to the PHP tree-sitter grammar for the kinds")
 		os.Exit(0)
 	}
@@ -29,9 +28,9 @@ func countKind(fileName string, args []string) {
 		os.Exit(1)
 	}
 
-	if *countKindRecursive {
+	if directory {
 		var wg sync.WaitGroup
-		countKindDir(fileName, countKindOperation.Args()[0], &wg)
+		countKindDir(fileName, countKindOperation.Args()[0], recursive, &wg)
 		wg.Wait()
 		return
 	}
@@ -39,7 +38,7 @@ func countKind(fileName string, args []string) {
 	return
 }
 
-func countKindDir(directory, kind string, wg *sync.WaitGroup) {
+func countKindDir(directory, kind string, recursive bool, wg *sync.WaitGroup) {
 	// Read all files in directory
 	files, err := os.ReadDir(directory)
 	if err != nil {
@@ -47,15 +46,20 @@ func countKindDir(directory, kind string, wg *sync.WaitGroup) {
 		os.Exit(1)
 	}
 	for _, file := range files {
-		if file.IsDir() {
-			countKindDir(directory+"/"+file.Name(), kind, wg)
-		} else if !file.IsDir() {
-			wg.Add(1)
-			go func(fileName, kind string) {
-				defer wg.Done()
-				countKindFile(fileName, kind)
-			}(directory+"/"+file.Name(), kind)
+		if file.IsDir() && recursive {
+			countKindDir(directory+"/"+file.Name(), kind, recursive, wg)
+		} else if file.IsDir() {
+			continue
 		}
+		if utils.FileExtension(file.Name(), 2) != ".ast.json" {
+			continue
+		}
+		wg.Add(1)
+		go func(fileName, kind string) {
+			defer wg.Done()
+			countKindFile(fileName, kind)
+		}(directory+"/"+file.Name(), kind)
+
 	}
 }
 
