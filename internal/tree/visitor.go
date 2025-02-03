@@ -10,11 +10,11 @@ func (n *Node) WalkPostfixWithCallback(callback VisitorFunc) []interface{} {
 	return callback(n, results)
 }
 
-func (n *Node) WalfPrefixWithCallback(callback VisitorFunc) []interface{} {
+func (n *Node) WalkPrefixWithCallback(callback VisitorFunc) []interface{} {
 	var results []interface{}
 	results = append(results, callback(n, results))
 	for _, child := range n.Descendants {
-		results = append(results, child.WalfPrefixWithCallback(callback)...)
+		results = append(results, child.WalkPrefixWithCallback(callback)...)
 	}
 	return results
 }
