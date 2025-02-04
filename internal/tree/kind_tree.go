@@ -34,7 +34,7 @@ func (kt *KindTree) Match(n *Node) bool {
 	if n.Attributes != nil && n.Attributes[kt.Name+"matched"].V == true {
 		return false
 	}
-	if n.Kind != kt.Kind {
+	if kt.Kind != "any" && n.Kind != kt.Kind {
 		return false
 	}
 	if kt.Attributes != nil {

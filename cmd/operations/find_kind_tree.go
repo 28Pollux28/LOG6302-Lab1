@@ -122,6 +122,6 @@ func findKindTreeFile(fileName string, kindTree tree.KindTree) {
 	v := &tree.VisitorFind{KindTree: kindTree}
 	treeNode.WalkPostfixWithCallback(v)
 	for _, node := range v.Nodes {
-		fmt.Printf("%s: found kind tree at line : %d\n", fileName, node.StartPosition.Row+1)
+		fmt.Printf("%s: found kind tree near line : %d\n", fileName, node.StartPosition.Row+1)
 	}
 }
