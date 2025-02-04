@@ -1,7 +1,10 @@
 package tree
 
+import "regexp"
+
 type KindTreeAttributes struct {
-	Text string `json:"text"`
+	Text      *string `json:"text"`
+	TextRegex *string `json:"text_regex"`
 }
 
 type KindTree struct {
@@ -34,8 +37,10 @@ func (kt *KindTree) Match(n *Node) bool {
 	if n.Kind != kt.Kind {
 		return false
 	}
-	if kt.Attributes != nil && n.Text != kt.Attributes.Text {
-		return false
+	if kt.Attributes != nil {
+		if !kt.Attributes.Match(n) {
+			return false
+		}
 	}
 	for _, child := range kt.Children {
 		found := false
@@ -47,6 +52,20 @@ func (kt *KindTree) Match(n *Node) bool {
 			}
 		}
 		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+func (kta *KindTreeAttributes) Match(n *Node) bool {
+	if kta.Text != nil {
+		if n.Text != *kta.Text {
+			return false
+		}
+	}
+	if kta.TextRegex != nil {
+		if !regexp.MustCompile(*kta.TextRegex).MatchString(n.Text) {
 			return false
 		}
 	}

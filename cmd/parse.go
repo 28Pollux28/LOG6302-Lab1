@@ -14,7 +14,7 @@ import (
 
 func parsePHP(args []string) {
 	parseCmd := flag.NewFlagSet("parse", flag.ExitOnError)
-	outputFile := parseCmd.String("output", "tree.json", "The output JSON file")
+	outputFile := parseCmd.String("output", "tree.ast.json", "The output JSON file")
 	prettyPrint := parseCmd.Bool("pretty", false, "Pretty print the JSON output")
 	directory := parseCmd.Bool("directory", false, "Parse a directory of PHP files")
 	recursive := parseCmd.Bool("recursive", false, "Recursively parse a directory of PHP files")

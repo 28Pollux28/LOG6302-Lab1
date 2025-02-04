@@ -10,6 +10,9 @@ import (
 	"sync"
 )
 
+var totalCounts = make(map[string]int)
+var mu sync.Mutex
+
 func countKinds(fileName string, args []string, directory, recursive bool) {
 	countKindsOperation := flag.NewFlagSet("count-kinds", flag.ExitOnError)
 	countKindsHelp := countKindsOperation.Bool("help", false, "Show help for the count-kind operation")
@@ -32,6 +35,7 @@ func countKinds(fileName string, args []string, directory, recursive bool) {
 		var wg sync.WaitGroup
 		countKindsDir(fileName, countKindsOperation.Args(), recursive, &wg)
 		wg.Wait()
+		printTotalCounts()
 		return
 	}
 	countKindsFile(fileName, countKindsOperation.Args())
@@ -77,8 +81,21 @@ func countKindsFile(fileName string, kinds []string) {
 	}
 
 	counts := treeNode.CountKinds(kinds)
+	mu.Lock()
+	for kind, count := range counts {
+		totalCounts[kind] += count
+	}
+	mu.Unlock()
 	fmt.Printf("Results for file %s\n", fileName)
 	for kind, count := range counts {
+		fmt.Printf("%s: %d\n", kind, count)
+	}
+}
+
+func printTotalCounts() {
+	fmt.Println("-------------------------")
+	fmt.Println("Total counts for all files:")
+	for kind, count := range totalCounts {
 		fmt.Printf("%s: %d\n", kind, count)
 	}
 }
