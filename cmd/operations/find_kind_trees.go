@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/internal/ast"
 	"github.com/28Pollux28/log6302-parser/utils"
 )
 
@@ -60,7 +60,7 @@ func findKindTrees(fileName string, args []string, directory, recursive bool) {
 		os.Exit(1)
 	}
 
-	kindTrees := make(map[string]tree.KindTree)
+	kindTrees := make(map[string]ast.KindTree)
 	kindTreesJSON, err := os.ReadFile(findKindTreesOperation.Args()[0])
 	if err != nil {
 		fmt.Println(err)
@@ -81,7 +81,7 @@ func findKindTrees(fileName string, args []string, directory, recursive bool) {
 	findKindTreesFile(fileName, kindTrees)
 }
 
-func findKindTreesDir(directory string, kindTrees map[string]tree.KindTree, recursive bool, wg *sync.WaitGroup) {
+func findKindTreesDir(directory string, kindTrees map[string]ast.KindTree, recursive bool, wg *sync.WaitGroup) {
 	// Read all files in directory
 	files, err := os.ReadDir(directory)
 	if err != nil {
@@ -98,21 +98,21 @@ func findKindTreesDir(directory string, kindTrees map[string]tree.KindTree, recu
 			continue
 		}
 		wg.Add(1)
-		go func(fileName string, kindTrees map[string]tree.KindTree) {
+		go func(fileName string, kindTrees map[string]ast.KindTree) {
 			defer wg.Done()
 			findKindTreesFile(fileName, kindTrees)
 		}(directory+"/"+file.Name(), kindTrees)
 	}
 }
 
-func findKindTreesFile(fileName string, kindTrees map[string]tree.KindTree) {
+func findKindTreesFile(fileName string, kindTrees map[string]ast.KindTree) {
 	// Load file
 	fileJSON, err := os.ReadFile(fileName)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var treeNode tree.Node
+	var treeNode ast.Node
 	err = json.Unmarshal(fileJSON, &treeNode)
 	if err != nil {
 		fmt.Printf("Error parsing tree in file %s : %s\n", fileName, err)
@@ -120,11 +120,11 @@ func findKindTreesFile(fileName string, kindTrees map[string]tree.KindTree) {
 	}
 
 	// Find kind tree in tree
-	v := &tree.VisitorFinds{
+	v := &ast.VisitorFinds{
 		KindTrees: kindTrees,
-		Nodes:     make(map[string][]*tree.Node),
+		Nodes:     make(map[string][]*ast.Node),
 	}
-	treeNode.WalkPostfixWithCallback(v)
+	treeNode.WalkPostfix(v)
 	if len(v.Nodes) == 0 {
 		return
 	}

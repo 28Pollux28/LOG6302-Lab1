@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/internal/ast"
 	"github.com/28Pollux28/log6302-parser/utils"
 )
 
@@ -64,7 +64,7 @@ func findKindTree(fileName string, args []string, directory, recursive bool) {
 		os.Exit(1)
 	}
 
-	var kindTree tree.KindTree
+	var kindTree ast.KindTree
 	err = json.Unmarshal(kindTreeJSON, &kindTree)
 	if err != nil {
 		fmt.Printf("Error parsing kind tree: %s\n", err)
@@ -80,7 +80,7 @@ func findKindTree(fileName string, args []string, directory, recursive bool) {
 	findKindTreeFile(fileName, kindTree)
 }
 
-func findKindTreeDir(filename string, kindTree tree.KindTree, recursive bool, wg *sync.WaitGroup) {
+func findKindTreeDir(filename string, kindTree ast.KindTree, recursive bool, wg *sync.WaitGroup) {
 	// Read all files in directory
 	files, err := os.ReadDir(filename)
 	if err != nil {
@@ -97,21 +97,21 @@ func findKindTreeDir(filename string, kindTree tree.KindTree, recursive bool, wg
 			continue
 		}
 		wg.Add(1)
-		go func(fileName string, kindTree tree.KindTree) {
+		go func(fileName string, kindTree ast.KindTree) {
 			defer wg.Done()
 			findKindTreeFile(fileName, kindTree)
 		}(filename+"/"+file.Name(), kindTree)
 	}
 }
 
-func findKindTreeFile(fileName string, kindTree tree.KindTree) {
+func findKindTreeFile(fileName string, kindTree ast.KindTree) {
 	// Load file
 	fileJSON, err := os.ReadFile(fileName)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var treeNode tree.Node
+	var treeNode ast.Node
 	err = json.Unmarshal(fileJSON, &treeNode)
 	if err != nil {
 		fmt.Printf("Error parsing tree in file %s : %s\n", fileName, err)
@@ -119,8 +119,8 @@ func findKindTreeFile(fileName string, kindTree tree.KindTree) {
 	}
 
 	// Find kind tree in tree
-	v := &tree.VisitorFind{KindTree: kindTree}
-	treeNode.WalkPostfixWithCallback(v)
+	v := &ast.VisitorFind{KindTree: kindTree}
+	treeNode.WalkPostfix(v)
 	for _, node := range v.Nodes {
 		fmt.Printf("%s: found kind tree near line : %d\n", fileName, node.StartPosition.Row+1)
 	}

@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/internal/ast"
 	"github.com/28Pollux28/log6302-parser/utils"
 )
 
@@ -71,13 +71,13 @@ func countKindFile(fileName, kind string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var treeNode tree.Node
+	var treeNode ast.Node
 	err = json.Unmarshal(fileJSON, &treeNode)
 	if err != nil {
 		fmt.Printf("Error unmarshalling JSON in file %s: %v\n", fileName, err)
 		os.Exit(1)
 	}
-	v := &tree.VisitorCount{Kind: kind}
-	treeNode.WalkPostfixWithCallback(v)
+	v := &ast.VisitorCount{Kind: kind}
+	treeNode.WalkPostfix(v)
 	fmt.Printf("%s : Number of nodes of kind %s: %d\n", fileName, kind, v.Count)
 }

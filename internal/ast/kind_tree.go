@@ -1,6 +1,8 @@
-package tree
+package ast
 
-import "regexp"
+import (
+	"regexp"
+)
 
 type KindTreeAttributes struct {
 	Text      *string `json:"text"`

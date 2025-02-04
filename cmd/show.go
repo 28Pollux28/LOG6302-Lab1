@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/internal/ast"
 	"os"
 )
 
@@ -33,7 +33,7 @@ func showTree(args []string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	var treeNode tree.Node
+	var treeNode ast.Node
 	err = json.Unmarshal(file, &treeNode)
 	if err != nil {
 		fmt.Println(err)

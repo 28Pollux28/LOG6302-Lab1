@@ -8,7 +8,7 @@ import (
 	"path"
 	"sync"
 
-	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/internal/ast"
 	ts "github.com/tree-sitter/go-tree-sitter"
 	tree_sitter_php "github.com/tree-sitter/tree-sitter-php/bindings/go"
 )
@@ -100,7 +100,7 @@ func parseFile(filePHP []byte, outputFile string, prettyPrint bool) {
 
 	root := treesitterTree.RootNode()
 
-	treeNode := tree.WalkTreeSitterTree(root, &filePHP)
+	treeNode := ast.WalkTreeSitterTree(root, &filePHP)
 
 	dir := path.Dir(outputFile)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {

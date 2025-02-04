@@ -1,4 +1,4 @@
-package tree
+package ast
 
 type VisitorCount struct {
 	Count int
