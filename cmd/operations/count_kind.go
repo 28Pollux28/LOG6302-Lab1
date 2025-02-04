@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/28Pollux28/log6302-parser/internal/tree"
-	"github.com/28Pollux28/log6302-parser/utils"
 	"os"
 	"sync"
+
+	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/utils"
 )
 
 func countKind(fileName string, args []string, directory, recursive bool) {
@@ -76,6 +77,7 @@ func countKindFile(fileName, kind string) {
 		fmt.Printf("Error unmarshalling JSON in file %s: %v\n", fileName, err)
 		os.Exit(1)
 	}
-	count := treeNode.CountKind(kind)
-	fmt.Printf("%s : Number of nodes of kind %s: %d\n", fileName, kind, count)
+	v := &tree.VisitorCount{Kind: kind}
+	treeNode.WalkPostfixWithCallback(v)
+	fmt.Printf("%s : Number of nodes of kind %s: %d\n", fileName, kind, v.Count)
 }

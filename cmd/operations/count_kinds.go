@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/28Pollux28/log6302-parser/internal/tree"
-	"github.com/28Pollux28/log6302-parser/utils"
 	"os"
 	"sync"
+
+	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/utils"
 )
 
 var totalCounts = make(map[string]int)
@@ -79,15 +80,16 @@ func countKindsFile(fileName string, kinds []string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	v := &tree.VisitorCounts{Kinds: kinds}
+	treeNode.WalkPostfixWithCallback(v)
 
-	counts := treeNode.CountKinds(kinds)
 	mu.Lock()
-	for kind, count := range counts {
+	for kind, count := range v.Counts {
 		totalCounts[kind] += count
 	}
 	mu.Unlock()
 	fmt.Printf("Results for file %s\n", fileName)
-	for kind, count := range counts {
+	for kind, count := range v.Counts {
 		fmt.Printf("%s: %d\n", kind, count)
 	}
 }

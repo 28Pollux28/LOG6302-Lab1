@@ -1,5 +1,6 @@
 package tree
 
+/*
 func (n *Node) CountKind(kind string) int {
 	results := n.WalkPostfixWithCallback(n.countKind(kind))
 	return results[0].(int)
@@ -94,3 +95,4 @@ func (n *Node) findKindTrees(kindTreeMap map[string]KindTree) VisitorFunc {
 		return []interface{}{foundNodesMap}
 	}
 }
+*/

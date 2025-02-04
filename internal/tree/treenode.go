@@ -2,6 +2,7 @@ package tree
 
 import (
 	"fmt"
+
 	ts "github.com/tree-sitter/go-tree-sitter"
 )
 
@@ -88,4 +89,15 @@ func (n *Node) printTree(level int) {
 
 func (n *Node) String() string {
 	return fmt.Sprintf("ID: %d, Kind: %s, GrammarName: %s, IsNamed: %t, IsExtra: %t, HasChanges: %t, HasError: %t, IsError: %t, ParseState: %d, NextParseState: %d, IsMissing: %t, StartByte: %d, EndByte: %d, StartPosition: %v, EndPosition: %v, Text: %s", n.ID, n.Kind, n.GrammarName, n.IsNamed, n.IsExtra, n.HasChanges, n.HasError, n.IsError, n.ParseState, n.NextParseState, n.IsMissing, n.StartByte, n.EndByte, n.StartPosition, n.EndPosition, n.Text)
+}
+
+func (n *Node) accept(v Visitor) {
+	v.VisitNode(n)
+}
+
+func (n *Node) WalkPostfixWithCallback(v Visitor) {
+	for _, child := range n.Descendants {
+		child.WalkPostfixWithCallback(v)
+	}
+	n.accept(v)
 }

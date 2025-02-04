@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/28Pollux28/log6302-parser/internal/tree"
-	"github.com/28Pollux28/log6302-parser/utils"
 	"os"
 	"sync"
+
+	"github.com/28Pollux28/log6302-parser/internal/tree"
+	"github.com/28Pollux28/log6302-parser/utils"
 )
 
 func findKindTree(fileName string, args []string, directory, recursive bool) {
@@ -118,8 +119,9 @@ func findKindTreeFile(fileName string, kindTree tree.KindTree) {
 	}
 
 	// Find kind tree in tree
-	foundNodes := treeNode.FindKindTree(kindTree)
-	for _, node := range foundNodes {
+	v := &tree.VisitorFind{KindTree: kindTree}
+	treeNode.WalkPostfixWithCallback(v)
+	for _, node := range v.Nodes {
 		fmt.Printf("%s: found kind tree at line : %d\n", fileName, node.StartPosition.Row+1)
 	}
 }
