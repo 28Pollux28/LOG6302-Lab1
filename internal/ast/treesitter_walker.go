@@ -1,4 +1,4 @@
-package tree
+package ast
 
 import ts "github.com/tree-sitter/go-tree-sitter"
 
