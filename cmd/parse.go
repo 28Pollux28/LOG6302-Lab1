@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/28Pollux28/log6302-parser/internal/tree"
-	ts "github.com/tree-sitter/go-tree-sitter"
-	tree_sitter_php "github.com/tree-sitter/tree-sitter-php/bindings/go"
 	"os"
 	"path"
 	"sync"
+
+	"github.com/28Pollux28/log6302-parser/internal/tree"
+	ts "github.com/tree-sitter/go-tree-sitter"
+	tree_sitter_php "github.com/tree-sitter/tree-sitter-php/bindings/go"
 )
 
 func parsePHP(args []string) {
@@ -109,7 +110,7 @@ func parseFile(filePHP []byte, outputFile string, prettyPrint bool) {
 			os.Exit(1)
 		}
 	}
-	file, err := os.OpenFile(outputFile, os.O_CREATE|os.O_TRUNC, os.ModePerm)
+	file, err := os.OpenFile(outputFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		fmt.Printf("Error creating file: %v\n", err)
 		os.Exit(1)
