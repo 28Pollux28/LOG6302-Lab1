@@ -80,7 +80,10 @@ func countKindsFile(fileName string, kinds []string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	v := &tree.VisitorCounts{Kinds: kinds}
+	v := &tree.VisitorCounts{
+		Kinds:  kinds,
+		Counts: make(map[string]int),
+	}
 	treeNode.WalkPostfixWithCallback(v)
 
 	mu.Lock()

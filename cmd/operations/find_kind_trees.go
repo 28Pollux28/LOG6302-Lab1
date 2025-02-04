@@ -120,7 +120,10 @@ func findKindTreesFile(fileName string, kindTrees map[string]tree.KindTree) {
 	}
 
 	// Find kind tree in tree
-	v := &tree.VisitorFinds{KindTrees: kindTrees}
+	v := &tree.VisitorFinds{
+		KindTrees: kindTrees,
+		Nodes:     make(map[string][]*tree.Node),
+	}
 	treeNode.WalkPostfixWithCallback(v)
 	if len(v.Nodes) == 0 {
 		return
