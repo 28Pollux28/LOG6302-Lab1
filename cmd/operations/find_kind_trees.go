@@ -128,12 +128,12 @@ func findKindTreesFile(fileName string, kindTrees map[string]ast.KindTree) {
 	if len(v.Nodes) == 0 {
 		return
 	}
-	fmt.Println("Results:")
+	fmt.Printf("Results for file %s:\n", fileName)
 	for key, nodesArray := range v.Nodes {
 		fmt.Printf("Found occurences for %s : \n", key)
 		for _, node := range nodesArray {
-			fmt.Printf("file: %s, near line: %d\n", fileName, node.StartPosition.Row+1)
+			fmt.Printf("Near line: %d\n", node.StartPosition.Row+1)
 		}
-		fmt.Print("----------------------\n")
 	}
+	fmt.Print("----------------------\n")
 }
