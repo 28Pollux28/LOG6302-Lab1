@@ -4,120 +4,120 @@ import (
 	"github.com/28Pollux28/log6302-parser/utils"
 )
 
-func GetRenders() map[string]func(*utils.Stack, *Node) IBlock {
-	return map[string]func(*utils.Stack, *Node) IBlock{
-		"program": func(s *utils.Stack, n *Node) IBlock {
+func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
+	return map[string]func(*utils.Stack, Node) IBlock{
+		"program": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &VerticalBlock{
 				Blocks:    blocks,
 				BlockType: ProgramBlockType,
 			}
 		},
-		"php_tag": func(s *utils.Stack, n *Node) IBlock {
+		"php_tag": func(s *utils.Stack, n Node) IBlock {
 			return PHP_TAG_BLOCK
 		},
-		"text_interpolation": func(s *utils.Stack, n *Node) IBlock {
+		"text_interpolation": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &VerticalBlock{
 				Blocks:    blocks,
 				BlockType: TextInterpolationBlockType,
 			}
 		},
-		"text": func(s *utils.Stack, n *Node) IBlock {
+		"text": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
-				Content:   n.Text,
+				Content:   n.GetText(),
 				BlockType: TextBlockType,
 			}
 		},
-		"bottom_type": func(s *utils.Stack, n *Node) IBlock {
+		"bottom_type": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: BottomTypeBlockType,
 			}
 		},
-		"union_type": func(s *utils.Stack, n *Node) IBlock {
+		"union_type": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: UnionTypeBlockType,
 			}
 		},
-		"intersection_type": func(s *utils.Stack, n *Node) IBlock {
+		"intersection_type": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: IntersectionTypeBlockType,
 			}
 		},
-		"primitive_type": func(s *utils.Stack, n *Node) IBlock {
+		"primitive_type": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: PrimitiveTypeBlockType,
 			}
 		},
-		"cast_type": func(s *utils.Stack, n *Node) IBlock {
+		"cast_type": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
-				Content:   n.Text,
+				Content:   n.GetText(),
 				BlockType: CastTypeBlockType,
 			}
 		},
-		"const_element": func(s *utils.Stack, n *Node) IBlock {
+		"const_element": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
 				BlockType: ConstElementBlockType,
 			}
 		},
-		"exit_statement": func(s *utils.Stack, n *Node) IBlock {
+		"exit_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: ExitStatementBlockType,
 			}
 		},
-		"unset_statement": func(s *utils.Stack, n *Node) IBlock {
+		"unset_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: UnsetStatementBlockType,
 			}
 		},
-		"literal": func(s *utils.Stack, n *Node) IBlock {
+		"literal": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: LiteralBlockType,
 			}
 		},
-		"float": func(s *utils.Stack, n *Node) IBlock {
+		"float": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
-				Content:   n.Text,
+				Content:   n.GetText(),
 				BlockType: FloatBlockType,
 			}
 		},
-		"integer": func(s *utils.Stack, n *Node) IBlock {
+		"integer": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
-				Content:   n.Text,
+				Content:   n.GetText(),
 				BlockType: IntegerBlockType,
 			}
 		},
-		"return_statement": func(s *utils.Stack, n *Node) IBlock {
+		"return_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: ReturnStatementBlockType,
 			}
 		},
-		"throw_expression": func(s *utils.Stack, n *Node) IBlock {
+		"throw_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: ThrowExpressionBlockType,
 			}
 		},
-		"while_statement": func(s *utils.Stack, n *Node) IBlock {
+		"while_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
 			var colonBlockFlag bool
@@ -160,14 +160,14 @@ func GetRenders() map[string]func(*utils.Stack, *Node) IBlock {
 				BlockType: WhileStatementBlockType,
 			}
 		},
-		"do_statement": func(s *utils.Stack, n *Node) IBlock {
+		"do_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: DoStatementBlockType,
 			}
 		},
-		"for_statement": func(s *utils.Stack, n *Node) IBlock {
+		"for_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
 			var colonBlockFlag bool
@@ -231,7 +231,7 @@ func GetRenders() map[string]func(*utils.Stack, *Node) IBlock {
 				BlockType: ForStatementBlockType,
 			}
 		},
-		"sequence_expression": func(s *utils.Stack, n *Node) IBlock {
+		"sequence_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
 			for _, block := range blocks {
@@ -246,7 +246,7 @@ func GetRenders() map[string]func(*utils.Stack, *Node) IBlock {
 				BlockType: SequenceExpressionBlockType,
 			}
 		},
-		"cast_expression": func(s *utils.Stack, n *Node) IBlock {
+		"cast_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
 			for i, block := range blocks {
@@ -260,7 +260,7 @@ func GetRenders() map[string]func(*utils.Stack, *Node) IBlock {
 				BlockType: CastExpressionBlockType,
 			}
 		},
-		"cast_variable": func(s *utils.Stack, n *Node) IBlock {
+		"cast_variable": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
 			for i, block := range blocks {
@@ -274,14 +274,14 @@ func GetRenders() map[string]func(*utils.Stack, *Node) IBlock {
 				BlockType: CastVariableBlockType,
 			}
 		},
-		"assignement_expression": func(s *utils.Stack, n *Node) IBlock {
+		"assignement_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
 				BlockType: AssignmentExpressionBlockType,
 			}
 		},
-		"reference_assignment_expression": func(s *utils.Stack, n *Node) IBlock {
+		"reference_assignment_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
 			for i, block := range blocks {
@@ -295,36 +295,36 @@ func GetRenders() map[string]func(*utils.Stack, *Node) IBlock {
 				BlockType: ReferenceAssignmentExpressionBlockType,
 			}
 		},
-		"conditional_expression": func(s *utils.Stack, n *Node) IBlock {
+		"conditional_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
 				BlockType: ConditionalExpressionBlockType,
 			}
 		},
-		"augmented_assignment_expression": func(s *utils.Stack, n *Node) IBlock {
+		"augmented_assignment_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
 				BlockType: AugmentedAssignmentExpressionBlockType,
 			}
 		},
-		"variable_name": func(s *utils.Stack, n *Node) IBlock {
+		"variable_name": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: VariableNameBlockType,
 			}
 		},
-		"name": func(s *utils.Stack, n *Node) IBlock {
+		"name": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
-				Content:   n.Text,
+				Content:   n.GetText(),
 				BlockType: NameBlockType,
 			}
 		},
-		"comment": func(s *utils.Stack, n *Node) IBlock {
+		"comment": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
-				Content:   n.Text,
+				Content:   n.GetText(),
 				BlockType: CommentBlockType,
 			}
 		},

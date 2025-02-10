@@ -1,11 +1,7 @@
 package pretty_print
 
-type Node struct {
-	Kind      string
-	NChildren int
-	Text      string
-}
-
-func (n *Node) GetChildrenNumber() int {
-	return n.NChildren
+type Node interface {
+	GetChildrenNumber() int
+	GetKind() string
+	GetText() string
 }

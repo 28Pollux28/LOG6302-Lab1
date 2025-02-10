@@ -75,6 +75,14 @@ func (n *Node) GetChildrenNumber() int {
 	return len(n.Descendants)
 }
 
+func (n *Node) GetKind() string {
+	return n.Kind
+}
+
+func (n *Node) GetText() string {
+	return n.Text
+}
+
 func (n *Node) PrintTree() {
 	n.printTree(0)
 }
