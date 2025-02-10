@@ -1,4 +1,4 @@
-package test
+package pretty_print
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 
 type IBlock interface {
 	Render(indentLvl int) string
+	Type() BlockType
 }
 
 type HorizontalBlock struct {
@@ -22,6 +23,10 @@ func (h *HorizontalBlock) Render(indentLvl int) string {
 	return result
 }
 
+func (h *HorizontalBlock) Type() BlockType {
+	return h.BlockType
+}
+
 type VerticalBlock struct {
 	Blocks    []IBlock
 	BlockType BlockType
@@ -29,12 +34,19 @@ type VerticalBlock struct {
 
 func (v *VerticalBlock) Render(indentLvl int) string {
 	var buf bytes.Buffer
-	for _, block := range v.Blocks {
-		buf.WriteString(strings.Repeat("\t", indentLvl)) // Indentation
+	for i, block := range v.Blocks {
+		if i != 0 {
+			buf.WriteString("\n")
+			buf.WriteString(strings.Repeat("\t", indentLvl))
+		}
 		buf.WriteString(block.Render(indentLvl))
 		buf.WriteString("\n")
 	}
 	return buf.String()
+}
+
+func (v *VerticalBlock) Type() BlockType {
+	return v.BlockType
 }
 
 type IndentBlock struct {
@@ -45,6 +57,10 @@ func (i *IndentBlock) Render(indentLvl int) string {
 	return i.Block.Render(indentLvl + 1)
 }
 
+func (i *IndentBlock) Type() BlockType {
+	return NULL
+}
+
 type PrimitiveBlock struct {
 	Content   string
 	BlockType BlockType
@@ -52,4 +68,8 @@ type PrimitiveBlock struct {
 
 func (p *PrimitiveBlock) Render(indentLvl int) string {
 	return p.Content
+}
+
+func (p *PrimitiveBlock) Type() BlockType {
+	return p.BlockType
 }

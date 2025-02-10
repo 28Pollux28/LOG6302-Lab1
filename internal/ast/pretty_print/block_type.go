@@ -1,4 +1,4 @@
-package test
+package pretty_print
 
 type BlockType int
 
@@ -314,4 +314,6 @@ const (
 	RequireBlockType
 	RequireOnceBlockType
 	HashtagBlockType
+	NULL // NULL is a special BlockType used for IndentBlock
+	COMPOSITE
 )
