@@ -38,6 +38,11 @@ func (p *PrettyPrintVisitor) VisitNode(n *Node) {
 func initNodeConfig() map[string]func(*utils.Stack, pretty_print.Node) pretty_print.IBlock {
 	primitiveBlockMap := pretty_print.GetPrimitiveBlockRenders()
 	blockRendersMap := pretty_print.GetRenders()
-	maps.Copy(primitiveBlockMap, blockRendersMap)
+	maps.Copy(blockRendersMap, primitiveBlockMap)
 	return blockRendersMap
+}
+
+func (p *PrettyPrintVisitor) Print() string {
+	block := p.Result.Pop().(pretty_print.IBlock)
+	return block.Render(0)
 }

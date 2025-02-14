@@ -1,12 +1,21 @@
 package pretty_print
 
-import "github.com/28Pollux28/log6302-parser/utils"
+import (
+	"fmt"
+	"github.com/28Pollux28/log6302-parser/utils"
+	"slices"
+)
 
 func PopBlocksFromStack(s *utils.Stack, n int) []IBlock {
 	var blocks []IBlock
 	for range n {
-		blocks = append(blocks, s.Pop().(IBlock))
+		pop := s.Pop()
+		if pop == nil {
+			fmt.Println("Error: Stack is empty")
+		}
+		blocks = append(blocks, pop.(IBlock))
 	}
+	slices.Reverse(blocks)
 	return blocks
 }
 

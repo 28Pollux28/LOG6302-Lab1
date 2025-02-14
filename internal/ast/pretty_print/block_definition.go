@@ -28,8 +28,9 @@ func (h *HorizontalBlock) Type() BlockType {
 }
 
 type VerticalBlock struct {
-	Blocks    []IBlock
-	BlockType BlockType
+	Blocks      []IBlock
+	BlockType   BlockType
+	IndentFirst bool
 }
 
 func (v *VerticalBlock) Render(indentLvl int) string {
@@ -37,10 +38,11 @@ func (v *VerticalBlock) Render(indentLvl int) string {
 	for i, block := range v.Blocks {
 		if i != 0 {
 			buf.WriteString("\n")
-			buf.WriteString(strings.Repeat("\t", indentLvl))
+		}
+		if v.IndentFirst || i != 0 {
+			buf.WriteString(strings.Repeat("  ", indentLvl))
 		}
 		buf.WriteString(block.Render(indentLvl))
-		buf.WriteString("\n")
 	}
 	return buf.String()
 }
@@ -66,7 +68,7 @@ type PrimitiveBlock struct {
 	BlockType BlockType
 }
 
-func (p *PrimitiveBlock) Render(indentLvl int) string {
+func (p *PrimitiveBlock) Render(_ int) string {
 	return p.Content
 }
 

@@ -7,7 +7,8 @@ import (
 // Primitive Blocks that are used in multiple other blocks
 var (
 	WHITESPACE_BLOCK              = &PrimitiveBlock{Content: " ", BlockType: WhitespaceBlockType}
-	PHP_TAG_BLOCK                 = &PrimitiveBlock{Content: "<?php", BlockType: PhpTagBlockType}
+	PHP_TAG_BLOCK                 = &PrimitiveBlock{Content: "<?php\n", BlockType: PhpTagBlockType}
+	PHP_CLOSE_TAG_BLOCK           = &PrimitiveBlock{Content: "?>", BlockType: PhpCloseTagBlockType}
 	STATIC_BLOCK                  = &PrimitiveBlock{Content: "static", BlockType: StaticBlockType}
 	EQUALS_BLOCK                  = &PrimitiveBlock{Content: "=", BlockType: EqualsBlockType}
 	GLOBAL_BLOCK                  = &PrimitiveBlock{Content: "global", BlockType: GlobalBlockType}
@@ -164,6 +165,9 @@ func GetPrimitiveBlockRenders() map[string]func(*utils.Stack, Node) IBlock {
 	return map[string]func(*utils.Stack, Node) IBlock{
 		"<?php": func(s *utils.Stack, n Node) IBlock {
 			return PHP_TAG_BLOCK
+		},
+		"?>": func(s *utils.Stack, n Node) IBlock {
+			return PHP_CLOSE_TAG_BLOCK
 		},
 		"static": func(s *utils.Stack, n Node) IBlock {
 			return STATIC_BLOCK

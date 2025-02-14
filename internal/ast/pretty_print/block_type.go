@@ -5,9 +5,9 @@ type BlockType int
 const (
 	ProgramBlockType BlockType = iota
 	PhpTagBlockType
+	PhpCloseTagBlockType
 	TextInterpolationBlockType
 	TextBlockType
-	StatementBlockType
 	EmptyStatementBlockType
 	ReferenceModifierBlockType
 	FunctionStaticDeclarationBlockType
@@ -52,7 +52,6 @@ const (
 	PropertyPromotionParameterBlockType
 	SimpleParameterBlockType
 	VariadicParameterBlockType
-	TypeBlockType
 	NamedTypeBlockType
 	OptionalTypeBlockType
 	BottomTypeBlockType
@@ -67,7 +66,6 @@ const (
 	UnsetStatementBlockType
 	DeclareStatementBlockType
 	DeclareDirectiveBlockType
-	LiteralBlockType
 	FloatBlockType
 	TryStatementBlockType
 	CatchClauseBlockType
@@ -89,8 +87,6 @@ const (
 	ColonBlockBlockType
 	ElseIfClauseBlockType
 	ElseClauseBlockType
-	ElseIfClause2BlockType
-	ElseClause2BlockType
 	MatchExpressionBlockType
 	MatchBlockBlockType
 	MatchConditionListBlockType
@@ -103,11 +99,9 @@ const (
 	CompoundStatementBlockType
 	NamedLabelStatementBlockType
 	ExpressionStatementBlockType
-	ExpressionBlockType
 	UnaryOpExpressionBlockType
 	ErrorSuppressionExpressionBlockType
 	CloneExpressionBlockType
-	PrimaryExpressionBlockType
 	ParenthesizedExpressionBlockType
 	ClassConstantAccessExpressionBlockType
 	PrintIntrinsicBlockType
@@ -186,9 +180,7 @@ const (
 	IntTypeBlockType
 	VoidTypeBlockType
 	MixedTypeBlockType
-	FalseTypeBlockType
 	NullTypeBlockType
-	TrueTypeBlockType
 	CaseBlockType
 	ClassBlockType
 	FinalBlockType
@@ -293,7 +285,6 @@ const (
 	LogicalAndBlockType
 	BitwiseOrBlockType
 	BitwiseXorBlockType
-	BitwiseAndBlockType
 	EqualBlockType
 	NotEqualBlockType
 	IdenticalBlockType
@@ -317,3 +308,110 @@ const (
 	NULL // NULL is a special BlockType used for IndentBlock
 	COMPOSITE
 )
+
+func isBlockOfTypes(t BlockType, types ...BlockType) bool {
+	for _, ty := range types {
+		if t == ty {
+			return true
+		}
+	}
+	return false
+}
+
+func isBlockOfType(t BlockType, ty BlockType) bool {
+	return t == ty
+}
+
+func isStatementBlockType(t BlockType) bool {
+	return t == EmptyStatementBlockType ||
+		t == CompoundStatementBlockType ||
+		t == NamedLabelStatementBlockType ||
+		t == ExpressionStatementBlockType ||
+		t == IfStatementBlockType ||
+		t == SwitchStatementBlockType ||
+		t == WhileStatementBlockType ||
+		t == DoStatementBlockType ||
+		t == ForStatementBlockType ||
+		t == ForeachStatementBlockType ||
+		t == GotoStatementBlockType ||
+		t == ContinueStatementBlockType ||
+		t == BreakStatementBlockType ||
+		t == ReturnStatementBlockType ||
+		t == TryStatementBlockType ||
+		t == DeclareStatementBlockType ||
+		t == EchoStatementBlockType ||
+		t == ExitStatementBlockType ||
+		t == UnsetStatementBlockType ||
+		t == ConstDeclarationBlockType ||
+		t == FunctionDefinitionBlockType ||
+		t == ClassDeclarationBlockType ||
+		t == InterfaceDeclarationBlockType ||
+		t == TraitDeclarationBlockType ||
+		t == EnumDeclarationBlockType ||
+		t == NamespaceDefinitionBlockType ||
+		t == NamespaceUseDeclarationBlockType ||
+		t == GlobalDeclarationBlockType ||
+		t == FunctionStaticDeclarationBlockType
+}
+
+func isExpressionBlockType(t BlockType) bool {
+	return t == ConditionalExpressionBlockType ||
+		t == MatchConditionalExpressionBlockType ||
+		t == AugmentedAssignmentExpressionBlockType ||
+		t == AssignmentExpressionBlockType ||
+		t == ReferenceAssignmentExpressionBlockType ||
+		t == YieldExpressionBlockType ||
+		t == CloneExpressionBlockType ||
+		isPrimaryExpressionBlockType(t) ||
+		t == UnaryOpExpressionBlockType ||
+		t == CastExpressionBlockType ||
+		t == ErrorSuppressionExpressionBlockType ||
+		t == BinaryExpressionBlockType ||
+		t == IncludeExpressionBlockType ||
+		t == IncludeOnceExpressionBlockType ||
+		t == RequireExpressionBlockType ||
+		t == RequireOnceExpressionBlockType
+}
+
+func isPrimaryExpressionBlockType(t BlockType) bool {
+	return /*isVariableBlockType(t) ||*/ t == ClassConstantAccessExpressionBlockType ||
+		isLiteralBlockType(t) ||
+		t == QualifiedNameBlockType ||
+		t == NameBlockType ||
+		t == ArrayCreationExpressionBlockType ||
+		t == PrintIntrinsicBlockType ||
+		t == AnonymousFunctionBlockType ||
+		t == ObjectCreationExpressionBlockType ||
+		t == UpdateExpressionBlockType ||
+		t == ShellCommandExpressionBlockType ||
+		t == ParenthesizedExpressionBlockType ||
+		t == ThrowExpressionBlockType ||
+		t == ArrowFunctionBlockType
+}
+
+//func isVariableBlockType(t BlockType) bool {
+//	return t == CastVariableBlockType || //TODO: In the grammar it aliases to CastExpressionBlockType
+//		t == VariableNameBlockType ||
+//		t == DynamicVariableNameBlockType ||
+//
+//}
+
+func isLiteralBlockType(t BlockType) bool {
+	return t == IntegerBlockType ||
+		t == FloatBlockType ||
+		t == EncapsedStringBlockType ||
+		t == StringBlockType ||
+		t == HeredocBlockType ||
+		t == NowdocBlockType ||
+		t == BooleanBlockType ||
+		t == NullBlockType
+}
+
+func isTypeBlockType(t BlockType) bool {
+	return t == OptionalTypeBlockType ||
+		t == NamedTypeBlockType ||
+		t == PrimitiveTypeBlockType ||
+		t == UnionTypeBlockType ||
+		t == IntersectionTypeBlockType ||
+		t == DisjunctiveNormalFormTypeBlockType
+}

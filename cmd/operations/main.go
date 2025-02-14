@@ -48,6 +48,8 @@ func Main(args []string) {
 		findKindTree(fileName, operationsCmd.Args(), *directory, *recursive)
 	case "find-kind-trees":
 		findKindTrees(fileName, operationsCmd.Args(), *directory, *recursive)
+	case "pretty-print":
+		prettyPrint(fileName, operationsCmd.Args(), *directory, *recursive)
 	default:
 		fmt.Println("Please provide a valid operation. Type --help for more information")
 		os.Exit(1)
