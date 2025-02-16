@@ -8,6 +8,8 @@ import (
 type IBlock interface {
 	Render(indentLvl int) string
 	Type() BlockType
+	GetBlocks() []IBlock
+	AppendBlock(block IBlock)
 }
 
 type HorizontalBlock struct {
@@ -25,6 +27,14 @@ func (h *HorizontalBlock) Render(indentLvl int) string {
 
 func (h *HorizontalBlock) Type() BlockType {
 	return h.BlockType
+}
+
+func (h *HorizontalBlock) GetBlocks() []IBlock {
+	return h.Blocks
+}
+
+func (h *HorizontalBlock) AppendBlock(block IBlock) {
+	h.Blocks = append(h.Blocks, block)
 }
 
 type VerticalBlock struct {
@@ -51,6 +61,14 @@ func (v *VerticalBlock) Type() BlockType {
 	return v.BlockType
 }
 
+func (v *VerticalBlock) GetBlocks() []IBlock {
+	return v.Blocks
+}
+
+func (v *VerticalBlock) AppendBlock(block IBlock) {
+	v.Blocks = append(v.Blocks, block)
+}
+
 type IndentBlock struct {
 	Block IBlock
 }
@@ -61,6 +79,14 @@ func (i *IndentBlock) Render(indentLvl int) string {
 
 func (i *IndentBlock) Type() BlockType {
 	return NULL
+}
+
+func (i *IndentBlock) GetBlocks() []IBlock {
+	return []IBlock{i.Block}
+}
+
+func (i *IndentBlock) AppendBlock(block IBlock) {
+	panic("cannot append to IndentBlock")
 }
 
 type PrimitiveBlock struct {
@@ -74,4 +100,12 @@ func (p *PrimitiveBlock) Render(_ int) string {
 
 func (p *PrimitiveBlock) Type() BlockType {
 	return p.BlockType
+}
+
+func (p *PrimitiveBlock) GetBlocks() []IBlock {
+	return nil
+}
+
+func (p *PrimitiveBlock) AppendBlock(block IBlock) {
+	panic("cannot append to PrimitiveBlock")
 }

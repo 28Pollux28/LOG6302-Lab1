@@ -82,7 +82,7 @@ const (
 	ForStatementBlockType
 	SequenceExpressionBlockType
 	ForeachStatementBlockType
-	ForeachPairBlockType
+	PairBlockType
 	IfStatementBlockType
 	ColonBlockBlockType
 	ElseIfClauseBlockType

@@ -30,6 +30,27 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: TextBlockType,
 			}
 		},
+		"empty_statement": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: EmptyStatementBlockType,
+			}
+		},
+		"reference_modifier": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: ReferenceModifierBlockType,
+			}
+		},
+		"static_modifier": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: StaticModifierBlockType,
+			}
+		},
 		"function_definition": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
@@ -267,8 +288,19 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 		},
 		"return_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case ReturnBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case SemicolonBlockType:
+					result = append(result, block)
+				default:
+					result = append(result, block)
+				}
+			}
 			return &HorizontalBlock{
-				Blocks:    blocks,
+				Blocks:    result,
 				BlockType: ReturnStatementBlockType,
 			}
 		},
@@ -332,10 +364,23 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: WhileStatementBlockType,
 			}
 		},
-		"do_statement": func(s *utils.Stack, n Node) IBlock { //todo
+		"do_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case DoBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case WhileBlockType:
+					result = append(result, WHITESPACE_BLOCK, block, WHITESPACE_BLOCK)
+				case SemicolonBlockType:
+					result = append(result, block)
+				default:
+					result = append(result, block)
+				}
+			}
 			return &HorizontalBlock{
-				Blocks:    blocks,
+				Blocks:    append(result, NEWLINE_BLOCK),
 				BlockType: DoStatementBlockType,
 			}
 		},
@@ -419,39 +464,59 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: SequenceExpressionBlockType,
 			}
 		},
-		//"foreach_statement": func(s *utils.Stack, n Node) IBlock {
-		//	blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
-		//	var result []IBlock
-		//	var colonBlockFlag bool
-		//	for i, block := range blocks {
-		//		blockType := block.Type()
-		//		switch {
-		//		case isBlockOfType(blockType, ForeachBlockType):
-		//			result = append(result, block, WHITESPACE_BLOCK)
-		//		case isBlockOfType(blockType, OpenParenBlockType):
-		//			result = append(result, block)
-		//		case isBlockOfType(blockType, AsBlockType):
-		//			result = append(result, WHITESPACE_BLOCK, block, WHITESPACE_BLOCK)
-		//		case isBlockOfType(blockType, CloseParenBlockType):
-		//			result = append(result, block)
-		//			if i != len(blocks)-1 && (blocks[i+1].Type() != ColonBlockType && blocks[i+1].Type() != SemicolonBlockType) { //We need to look ahead to put the whitespace between the parenthesized expression and the statement {...}
-		//				result = append(result, WHITESPACE_BLOCK)
-		//			}
-		//		case isBlockOfType(blockType, ColonBlockBlockType):
-		//			colonBlockFlag = true
-		//			result = append(result, block)
-		//		case isBlockOfType(blockType, EndforeachBlockType):
-		//			result = append(result, block)
-		//		default:
-		//			result = append(result, block)
-		//		}
-		//	}
-		//},
-		"pair": func(s *utils.Stack, n Node) IBlock { //TODO : check //Actually foreach_pair in the grammar, but under alias for some reason
+		"foreach_statement": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			var colonBlockFlag bool
+			for i, block := range blocks {
+				switch block.Type() {
+				case ForeachBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case AsBlockType:
+					result = append(result, WHITESPACE_BLOCK, block, WHITESPACE_BLOCK)
+				case CloseParenBlockType:
+					if i != len(blocks)-1 && blocks[i+1].Type() != ColonBlockBlockType { //We need to look ahead to put the whitespace between the parenthesized expression and the statement {...}
+						result = append(result, block, WHITESPACE_BLOCK)
+					} else {
+						result = append(result, block)
+					}
+				case ColonBlockBlockType:
+					colonBlockFlag = true
+					result = append(result, block)
+				case EndforeachBlockType, SemicolonBlockType:
+					result = append(result, block)
+				default:
+					result = append(result, block)
+				}
+			}
+			result = append(result, NEWLINE_BLOCK)
+			// If there is a colon block, we need to put the endwhile and the semicolon in a horizontal block, then put them on a new line
+			if colonBlockFlag {
+				result = []IBlock{
+					&HorizontalBlock{
+						Blocks:    result[:len(result)-3],
+						BlockType: COMPOSITE,
+					},
+					&HorizontalBlock{ //Put the endwhile and the semicolon on the same line
+						Blocks:    result[len(result)-3:],
+						BlockType: COMPOSITE,
+					},
+				}
+				return &VerticalBlock{
+					Blocks:    result,
+					BlockType: ForeachStatementBlockType,
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: ForeachStatementBlockType,
+			}
+		},
+		"pair": func(s *utils.Stack, n Node) IBlock { //Actually foreach_pair in the grammar, but under alias for some reason
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
-				BlockType: ForeachPairBlockType,
+				BlockType: PairBlockType,
 			}
 		},
 		"if_statement": func(s *utils.Stack, n Node) IBlock {
@@ -595,6 +660,81 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &HorizontalBlock{
 				Blocks:    result,
 				BlockType: ElseClauseBlockType,
+			}
+		},
+		"match_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case MatchBlockType, ParenthesizedExpressionBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: MatchExpressionBlockType,
+			}
+		},
+		"match_block": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case CommaBlockType:
+					result[len(result)-1].AppendBlock(block)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &VerticalBlock{
+				Blocks: []IBlock{
+					&IndentBlock{
+						&VerticalBlock{
+							Blocks:    result[:len(result)-1],
+							BlockType: COMPOSITE,
+						},
+					},
+					&VerticalBlock{
+						Blocks:      []IBlock{result[len(result)-1]},
+						BlockType:   COMPOSITE,
+						IndentFirst: false,
+					},
+				},
+				BlockType: MatchBlockBlockType,
+			}
+		},
+		"match_condition_list": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: MatchConditionListBlockType,
+			}
+		},
+		"match_conditional_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: MatchConditionalExpressionBlockType,
+			}
+		},
+		"match_default_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: MatchDefaultExpressionBlockType,
 			}
 		},
 		"switch_statement": func(s *utils.Stack, n Node) IBlock {
