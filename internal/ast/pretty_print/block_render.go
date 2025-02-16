@@ -1114,6 +1114,60 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: StringContentBlockType,
 			}
 		},
+		"heredoc_body": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			newLineFLag := true
+			for i, block := range blocks {
+				switch block.Type() {
+				case OpenBraceBlockType:
+					newLineFLag = false
+					result = append(result, block)
+				case CloseBraceBlockType:
+					newLineFLag = true
+					result = append(result, block)
+				default:
+					if newLineFLag && (i != len(blocks)-1 && blocks[i+1].Type() != OpenBraceBlockType) {
+						result = append(result, block, NEWLINE_BLOCK)
+					} else {
+						result = append(result, block)
+					}
+				}
+			}
+			result = append(result, NEWLINE_BLOCK)
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: HeredocBodyBlockType,
+			}
+		},
+		"heredoc": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case HeredocBodyBlockType:
+					result = append(result, NEWLINE_BLOCK, block, NEWLINE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: HeredocBlockType,
+			}
+		},
+		"heredoc_start": func(s *utils.Stack, n Node) IBlock {
+			return &PrimitiveBlock{
+				Content:   n.GetText(),
+				BlockType: HeredocStartBlockType,
+			}
+		},
+		"heredoc_end": func(s *utils.Stack, n Node) IBlock {
+			return &PrimitiveBlock{
+				Content:   n.GetText(),
+				BlockType: HeredocEndBlockType,
+			}
+		},
 		"boolean": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
 				Content:   n.GetText(),

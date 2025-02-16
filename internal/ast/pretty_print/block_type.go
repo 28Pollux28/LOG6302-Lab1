@@ -137,6 +137,8 @@ const (
 	StringContentBlockType
 	HeredocBodyBlockType
 	HeredocBlockType
+	HeredocStartBlockType
+	HeredocEndBlockType
 	NowdocBodyBlockType
 	NowdocBlockType
 	ShellCommandExpressionBlockType
