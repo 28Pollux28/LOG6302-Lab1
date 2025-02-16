@@ -96,6 +96,27 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				IndentFirst: false,
 			}
 		},
+		"final_modifier": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: FinalModifierBlockType,
+			}
+		},
+		"abstract_modifier": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: AbstractModifierBlockType,
+			}
+		},
+		"readonly_modifier": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: ReadonlyModifierBlockType,
+			}
+		},
 		"class_interface_clause": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
@@ -110,6 +131,26 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &HorizontalBlock{
 				Blocks:    result,
 				BlockType: ClassInterfaceClauseBlockType,
+			}
+		},
+		"const_declaration": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case ConstBlockType, VisibilityModifierBlockType, StaticModifierBlockType, VarModifierBlockType, ReadonlyModifierBlockType, AbstractModifierBlockType, FinalModifierBlockType, CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				default:
+					if isTypeBlockType(block.Type()) {
+						result = append(result, block, WHITESPACE_BLOCK)
+					} else {
+						result = append(result, block)
+					}
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    append(result, NEWLINE_BLOCK),
+				BlockType: ConstDeclarationBlockType,
 			}
 		},
 		"property_declaration": func(s *utils.Stack, n Node) IBlock {
@@ -1238,11 +1279,46 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: MemberAccessExpressionBlockType,
 			}
 		},
+		"nullsafe_member_access_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: NullsafeMemberAccessExpressionBlockType,
+			}
+		},
+		"scoped_property_access_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: ScopedPropertyAccessExpressionBlockType,
+			}
+		},
 		"function_call_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: FunctionCallExpressionBlockType,
+			}
+		},
+		"scoped_call_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: ScopedCallExpressionBlockType,
+			}
+		},
+		"relative_scope": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: RelativeScopeBlockType,
+			}
+		},
+		"variadic_placeholder": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: VariadicPlaceholderBlockType,
 			}
 		},
 		"arguments": func(s *utils.Stack, n Node) IBlock {
@@ -1273,6 +1349,13 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: MemberCallExpressionBlockType,
+			}
+		},
+		"nullsafe_member_call_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: NullsafeMemberCallExpressionBlockType,
 			}
 		},
 		"escape_sequence": func(s *utils.Stack, n Node) IBlock {
