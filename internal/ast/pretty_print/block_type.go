@@ -305,6 +305,7 @@ const (
 	RequireBlockType
 	RequireOnceBlockType
 	HashtagBlockType
+	SubscriptExpressionBlockType
 	NULL // NULL is a special BlockType used for IndentBlock
 	COMPOSITE
 )

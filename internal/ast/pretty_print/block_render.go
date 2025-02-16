@@ -2,6 +2,7 @@ package pretty_print
 
 import (
 	"github.com/28Pollux28/log6302-parser/utils"
+	"strings"
 )
 
 func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
@@ -27,6 +28,63 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &PrimitiveBlock{
 				Content:   n.GetText(),
 				BlockType: TextBlockType,
+			}
+		},
+		"function_definition": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			var compoundStatementFlag IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case FunctionBlockType, ColonBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case CompoundStatementBlockType:
+					compoundStatementFlag = block
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks: append(result,
+					WHITESPACE_BLOCK,
+					compoundStatementFlag,
+					NEWLINE_BLOCK,
+				),
+				BlockType: FunctionDefinitionBlockType,
+			}
+		},
+		"formal_parameters": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: FormalParametersBlockType,
+			}
+		},
+		"simple_parameter": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch {
+				case isTypeBlockType(block.Type()):
+					result = append(result, block, WHITESPACE_BLOCK)
+				case block.Type() == EqualsBlockType:
+					result = append(result, WHITESPACE_BLOCK, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: SimpleParameterBlockType,
 			}
 		},
 		"named_type": func(s *utils.Stack, n Node) IBlock {
@@ -274,7 +332,7 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: WhileStatementBlockType,
 			}
 		},
-		"do_statement": func(s *utils.Stack, n Node) IBlock {
+		"do_statement": func(s *utils.Stack, n Node) IBlock { //todo
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
 				Blocks:    blocks,
@@ -389,6 +447,13 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 		//		}
 		//	}
 		//},
+		"pair": func(s *utils.Stack, n Node) IBlock { //TODO : check //Actually foreach_pair in the grammar, but under alias for some reason
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: ForeachPairBlockType,
+			}
+		},
 		"if_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
@@ -530,13 +595,6 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &HorizontalBlock{
 				Blocks:    result,
 				BlockType: ElseClauseBlockType,
-			}
-		},
-		"pair": func(s *utils.Stack, n Node) IBlock { //Actually foreach_pair in the grammar, but under alias for some reason
-			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
-			return &HorizontalBlock{
-				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
-				BlockType: ForeachPairBlockType,
 			}
 		},
 		"switch_statement": func(s *utils.Stack, n Node) IBlock {
@@ -843,10 +901,33 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: AugmentedAssignmentExpressionBlockType,
 			}
 		},
-		"arguments": func(s *utils.Stack, n Node) IBlock {
+		"member_access_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
-				Blocks:    joinBlocks(blocks, &HorizontalBlock{[]IBlock{COMMA_BLOCK, WHITESPACE_BLOCK}, COMPOSITE}),
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: MemberAccessExpressionBlockType,
+			}
+		},
+		"function_call_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: FunctionCallExpressionBlockType,
+			}
+		},
+		"arguments": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
 				BlockType: ArgumentsBlockType,
 			}
 		},
@@ -879,6 +960,9 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 		},
 		"string": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			if len(blocks) == 0 {
+				return STRING_TYPE_BLOCK
+			}
 			return &HorizontalBlock{
 				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
 				BlockType: StringBlockType,
@@ -888,6 +972,12 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &PrimitiveBlock{
 				Content:   n.GetText(),
 				BlockType: StringContentBlockType,
+			}
+		},
+		"boolean": func(s *utils.Stack, n Node) IBlock {
+			return &PrimitiveBlock{
+				Content:   n.GetText(),
+				BlockType: BooleanBlockType,
 			}
 		},
 		"variable_name": func(s *utils.Stack, n Node) IBlock {
@@ -911,6 +1001,34 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: BinaryExpressionBlockType,
 			}
 		},
+		"include_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: IncludeExpressionBlockType,
+			}
+		},
+		"include_once_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: IncludeOnceExpressionBlockType,
+			}
+		},
+		"require_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: RequireExpressionBlockType,
+			}
+		},
+		"require_once_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: RequireOnceExpressionBlockType,
+			}
+		},
 		"name": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
 				Content:   n.GetText(),
@@ -919,8 +1037,15 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 		},
 		"comment": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
-				Content:   n.GetText(),
+				Content:   strings.ReplaceAll(n.GetText(), "\t", "    "),
 				BlockType: CommentBlockType,
+			}
+		},
+		"subscript_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: SubscriptExpressionBlockType,
 			}
 		},
 	}

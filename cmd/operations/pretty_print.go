@@ -14,6 +14,7 @@ import (
 func prettyPrint(fileName string, args []string, directory, recursive bool) {
 	prettyPrintOperation := flag.NewFlagSet("pretty-print", flag.ExitOnError)
 	prettyPrintHelp := prettyPrintOperation.Bool("help", false, "Show help for the pretty-print operation")
+	prettyPrintErrorOnly := prettyPrintOperation.Bool("error-only", false, "Only print errors")
 	prettyPrintOperation.Parse(args[2:])
 	//TODO: add option to pretty print directly to a file
 
@@ -26,15 +27,15 @@ func prettyPrint(fileName string, args []string, directory, recursive bool) {
 
 	if directory {
 		var wg sync.WaitGroup
-		prettyPrintDir(fileName, recursive, &wg)
+		prettyPrintDir(fileName, recursive, *prettyPrintErrorOnly, &wg)
 		wg.Wait()
 		return
 	}
-	prettyPrintFile(fileName)
+	prettyPrintFile(fileName, *prettyPrintErrorOnly)
 	return
 }
 
-func prettyPrintDir(directory string, recursive bool, wg *sync.WaitGroup) {
+func prettyPrintDir(directory string, recursive, errorOnly bool, wg *sync.WaitGroup) {
 	// Read all files in directory
 	files, err := os.ReadDir(directory)
 	if err != nil {
@@ -43,7 +44,7 @@ func prettyPrintDir(directory string, recursive bool, wg *sync.WaitGroup) {
 	}
 	for _, file := range files {
 		if file.IsDir() && recursive {
-			prettyPrintDir(directory+"/"+file.Name(), recursive, wg)
+			prettyPrintDir(directory+"/"+file.Name(), recursive, errorOnly, wg)
 		} else if file.IsDir() {
 			continue
 		}
@@ -51,15 +52,15 @@ func prettyPrintDir(directory string, recursive bool, wg *sync.WaitGroup) {
 			continue
 		}
 		wg.Add(1)
-		go func(fileName string) {
+		go func(fileName string, errorOnly bool) {
 			defer wg.Done()
-			prettyPrintFile(fileName)
-		}(directory + "/" + file.Name())
+			prettyPrintFile(fileName, errorOnly)
+		}(directory+"/"+file.Name(), errorOnly)
 
 	}
 }
 
-func prettyPrintFile(fileName string) {
+func prettyPrintFile(fileName string, errorOnly bool) {
 	// Load file
 	fileJSON, err := os.ReadFile(fileName)
 	if err != nil {
@@ -74,5 +75,8 @@ func prettyPrintFile(fileName string) {
 	}
 	v := ast.NewPrettyPrintVisitor()
 	treeNode.WalkPostfix(v)
-	fmt.Printf("%s :\n%s\n", fileName, v.Print())
+	if !errorOnly {
+		fmt.Printf("%s :\n%s\n", fileName, v.Print())
+		return
+	}
 }

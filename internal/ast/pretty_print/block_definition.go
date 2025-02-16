@@ -40,7 +40,7 @@ func (v *VerticalBlock) Render(indentLvl int) string {
 			buf.WriteString("\n")
 		}
 		if v.IndentFirst || i != 0 {
-			buf.WriteString(strings.Repeat("  ", indentLvl))
+			buf.WriteString(strings.Repeat("    ", indentLvl))
 		}
 		buf.WriteString(block.Render(indentLvl))
 	}
