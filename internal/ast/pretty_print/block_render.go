@@ -112,6 +112,76 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: ClassInterfaceClauseBlockType,
 			}
 		},
+		"property_declaration": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case VisibilityModifierBlockType, StaticModifierBlockType, VarModifierBlockType, ReadonlyModifierBlockType, AbstractModifierBlockType, FinalModifierBlockType, CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case PropertyHookListBlockType:
+					result = append(result, WHITESPACE_BLOCK, block)
+				default:
+					if isTypeBlockType(block.Type()) {
+						result = append(result, block, WHITESPACE_BLOCK)
+					} else {
+						result = append(result, block)
+					}
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    append(result, NEWLINE_BLOCK),
+				BlockType: PropertyDeclarationBlockType,
+			}
+		},
+		"property_element": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, WHITESPACE_BLOCK),
+				BlockType: PropertyElementBlockType,
+			}
+		},
+		"property_hook_list": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks: []IBlock{
+					blocks[0],
+					NEWLINE_BLOCK,
+					&IndentBlock{
+						Block: &VerticalBlock{
+							Blocks:      blocks[1 : len(blocks)-1],
+							BlockType:   COMPOSITE,
+							IndentFirst: true,
+						},
+					},
+					NEWLINE_BLOCK,
+					&VerticalBlock{
+						Blocks: []IBlock{
+							blocks[len(blocks)-1],
+						},
+						BlockType:   COMPOSITE,
+						IndentFirst: true,
+					},
+				},
+				BlockType: PropertyHookListBlockType,
+			}
+		},
+		"property_hook": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch {
+				case block.Type() == FinalModifierBlockType, block.Type() == ArrowFunctionSequenceBlockType, block.Type() == NameBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: PropertyHookBlockType,
+			}
+		},
 		"method_declaration": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
@@ -143,6 +213,12 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 					Blocks:    append(result, NEWLINE_BLOCK),
 					BlockType: MethodDeclarationBlockType,
 				}
+			}
+		},
+		"var_modifier": func(s *utils.Stack, n Node) IBlock {
+			return &PrimitiveBlock{
+				Content:   n.GetText(),
+				BlockType: VarModifierBlockType,
 			}
 		},
 		"static_modifier": func(s *utils.Stack, n Node) IBlock {
@@ -1008,9 +1084,10 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 		},
 		"compound_statement": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
-			return &VerticalBlock{
+			return &HorizontalBlock{
 				Blocks: []IBlock{
 					blocks[0],
+					NEWLINE_BLOCK,
 					&IndentBlock{
 						Block: &VerticalBlock{
 							Blocks:      blocks[1 : len(blocks)-1],
@@ -1018,7 +1095,12 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 							IndentFirst: true,
 						},
 					},
-					blocks[len(blocks)-1],
+					NEWLINE_BLOCK,
+					&VerticalBlock{
+						Blocks:      []IBlock{blocks[len(blocks)-1]},
+						BlockType:   COMPOSITE,
+						IndentFirst: true,
+					},
 				},
 				BlockType: CompoundStatementBlockType,
 			}
