@@ -229,9 +229,9 @@ func GetPrimitiveBlockRenders() map[string]func(*utils.Stack, Node) IBlock {
 		"bool": func(s *utils.Stack, n Node) IBlock {
 			return BOOL_TYPE_BLOCK
 		},
-		"float": func(s *utils.Stack, n Node) IBlock {
-			return FLOAT_TYPE_BLOCK
-		},
+		//"float": func(s *utils.Stack, n Node) IBlock {
+		//	return FLOAT_TYPE_BLOCK
+		//},
 		//"string": func(s *utils.Stack, n Node) IBlock {
 		//	return STRING_TYPE_BLOCK
 		//},

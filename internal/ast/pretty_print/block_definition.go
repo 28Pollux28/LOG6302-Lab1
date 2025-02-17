@@ -18,11 +18,11 @@ type HorizontalBlock struct {
 }
 
 func (h *HorizontalBlock) Render(indentLvl int) string {
-	var result string
+	var buf bytes.Buffer
 	for _, block := range h.Blocks {
-		result += block.Render(indentLvl)
+		buf.WriteString(block.Render(indentLvl))
 	}
-	return result
+	return buf.String()
 }
 
 func (h *HorizontalBlock) Type() BlockType {
@@ -85,7 +85,7 @@ func (i *IndentBlock) GetBlocks() []IBlock {
 	return []IBlock{i.Block}
 }
 
-func (i *IndentBlock) AppendBlock(block IBlock) {
+func (i *IndentBlock) AppendBlock(_ IBlock) {
 	panic("cannot append to IndentBlock")
 }
 
@@ -106,6 +106,6 @@ func (p *PrimitiveBlock) GetBlocks() []IBlock {
 	return nil
 }
 
-func (p *PrimitiveBlock) AppendBlock(block IBlock) {
+func (p *PrimitiveBlock) AppendBlock(_ IBlock) {
 	panic("cannot append to PrimitiveBlock")
 }
