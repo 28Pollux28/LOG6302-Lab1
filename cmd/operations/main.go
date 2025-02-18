@@ -25,6 +25,7 @@ func Main(args []string) {
 		fmt.Println("  count-kinds - Count the number of nodes of multiple kinds")
 		fmt.Println("  find-kind-tree - Find the tree of nodes of a specific kind")
 		fmt.Println("  find-kind-trees - Find the trees of nodes of a specific kind")
+		fmt.Println("  pretty-print - Pretty print the AST tree back to PHP code")
 		os.Exit(0)
 	}
 
