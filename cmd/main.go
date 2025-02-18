@@ -21,7 +21,7 @@ func Main() {
 		fmt.Println("  parse - Parse a PHP file and output a JSON file with the tree")
 		fmt.Println("  show - Show the tree of a JSON file")
 		fmt.Println("  operations - Input a JSON tree file and then perform some operations on it")
-		fmt.Println("Type ./main [command] --help for more information on a command")
+		fmt.Println("Type ./go-php-parser [command] --help for more information on a command")
 		os.Exit(0)
 	}
 

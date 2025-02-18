@@ -199,11 +199,13 @@ func visitBreak(v *VisitorCFG, n *Node) {
 	v.NextLabel = ""
 
 	// Récupération du nœud de fin du while
-	pair := v.NodeStack.Peek().(utils.Pair)
-	endNode := pair.Second.(*CFGNode)
+	if !v.NodeStack.IsEmpty() {
+		pair := v.NodeStack.Peek().(utils.Pair)
+		endNode := pair.Second.(*CFGNode)
+		// Ajout d'un edge entre le dernier nœud visité et le nœud de fin du while
+		v.CFG.AddEdge(v.LastNode, endNode, "")
+	}
 
-	// Ajout d'un edge entre le dernier nœud visité et le nœud de fin du while
-	v.CFG.AddEdge(v.LastNode, endNode, "")
 	v.LastNode = nil
 }
 
@@ -277,12 +279,12 @@ func visitStatement(v *VisitorCFG, n *Node) {
 	}
 
 	// Propagation valeur de retour
-	retNode := v.CFG.AddNode("Argument")
-	retNode.SetColor("red")
-	retNode.IsSpread = true
-	v.CFG.AddEdge(v.LastNode, retNode, "")
-	v.LastNode = retNode
-	v.NextLabel = ""
+	// retNode := v.CFG.AddNode("Argument")
+	// retNode.SetColor("red")
+	// retNode.IsSpread = true
+	// v.CFG.AddEdge(v.LastNode, retNode, "")
+	// v.LastNode = retNode
+	// v.NextLabel = ""
 }
 
 func visitEncapsedString(v *VisitorCFG, n *Node) {
@@ -312,20 +314,21 @@ func visitFuncCall(v *VisitorCFG, n *Node) {
 	n.Descendants[1].accept(v)
 
 	// Propagation valeur de retour
-	argNode := v.CFG.AddNode("Argument")
-	argNode.SetColor("red")
-	argNode.IsSpread = true
-	v.CFG.AddEdge(v.LastNode, argNode, v.NextLabel)
-	v.NextLabel = ""
+	// argNode := v.CFG.AddNode("Argument")
+	// argNode.SetColor("red")
+	// argNode.IsSpread = true
+	// v.CFG.AddEdge(v.LastNode, argNode, v.NextLabel)
+	// v.NextLabel = ""
 
 	retNode := v.CFG.AddNode("RetValue")
 	retNode.SetColor("red")
 	retNode.IsSpread = true
 
-	v.CFG.AddEdge(argNode, callBeginNode, "")
+	v.CFG.AddEdge(v.LastNode, callBeginNode, v.NextLabel)
 	v.CFG.AddEdge(callBeginNode, callEndNode, "")
 	v.CFG.AddEdge(callEndNode, retNode, "")
 	v.LastNode = retNode
+	v.NextLabel = ""
 }
 
 func visitArgs(v *VisitorCFG, n *Node) {
@@ -334,6 +337,18 @@ func visitArgs(v *VisitorCFG, n *Node) {
 	v.LastNode = node
 	v.NextLabel = ""
 	visitChilden(v, n)
+}
+
+func visitArg(v *VisitorCFG, n *Node) {
+	visitChilden(v, n)
+
+	// Argument node
+	argNode := v.CFG.AddNode("Argument")
+	argNode.SetColor("red")
+	argNode.IsSpread = true
+	v.CFG.AddEdge(v.LastNode, argNode, v.NextLabel)
+	v.LastNode = argNode
+	v.NextLabel = ""
 }
 
 func visitFuncDef(v *VisitorCFG, n *Node) {

@@ -71,6 +71,18 @@ func NewTreeNode(node *ts.Node, source *[]byte) *Node {
 	}
 }
 
+func (n *Node) GetChildrenNumber() int {
+	return len(n.Descendants)
+}
+
+func (n *Node) GetKind() string {
+	return n.Kind
+}
+
+func (n *Node) GetText() string {
+	return n.Text
+}
+
 func (n *Node) PrintTree() {
 	n.printTree(0)
 }
@@ -104,4 +116,11 @@ func (n *Node) WalkPostfix(v Visitor) {
 		child.WalkPostfix(v)
 	}
 	n.accept(v)
+}
+
+func (n *Node) WalkPrefix(v Visitor) {
+	n.accept(v)
+	for _, child := range n.Descendants {
+		child.WalkPrefix(v)
+	}
 }
