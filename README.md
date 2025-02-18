@@ -112,6 +112,19 @@ go-php-parser operations ./output/file.ast.json find-kind-trees <kind-trees.kt.j
 go-php-parser operations --directory --recursive ./data/directory find-kind-trees <kind-trees.kt.json>
 ```
 
+#### Pretty print
+The pretty print operation allows you to print the AST JSON file back to a PHP file. The operation will print the AST JSON file to the standard output.
+```bash
+# Pretty print the AST JSON file
+# Use --directory to specify a directory instead of a file and --recursive to search recursively in the directory
+# Use --output to specify a file to write the output to or a directory when using --directory
+go-php-parser operations ./output/file.ast.json pretty-print
+go-php-parser operations --directory --recursive ./data/directory pretty-print
+go-php-parser operations ./output/file.ast.json pretty-print --output ./output/file.php
+go-php-parser operations --directory --recursive ./data/directory pretty-print --output ./output/directory
+
+```
+
 ## Contributors
 - [Valentin Lemaire](https://github.com/28Pollux28)
 - [Mattéo Ricard](https://github.com/RicardMatteo)
