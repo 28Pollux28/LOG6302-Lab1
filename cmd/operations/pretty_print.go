@@ -16,7 +16,7 @@ import (
 func prettyPrint(fileName string, args []string, directory, recursive bool) {
 	prettyPrintOperation := flag.NewFlagSet("pretty-print", flag.ExitOnError)
 	prettyPrintErrorOnly := prettyPrintOperation.Bool("error-only", false, "Only print errors")
-	outputFile := prettyPrintOperation.String("output", "", "The output JSON file")
+	outputFile := prettyPrintOperation.String("output", "", "The output PHP file")
 	prettyPrintHelp := prettyPrintOperation.Bool("help", false, "Show help for the pretty-print operation")
 	prettyPrintOperation.Parse(args[2:])
 
