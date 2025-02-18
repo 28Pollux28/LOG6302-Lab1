@@ -26,6 +26,7 @@ func Main(args []string) {
 		fmt.Println("  find-kind-tree - Find the tree of nodes of a specific kind")
 		fmt.Println("  find-kind-trees - Find the trees of nodes of a specific kind")
 		fmt.Println("  pretty-print - Pretty print the AST tree back to PHP code")
+		fmt.Println("  create-cfg - Create a CFG from the AST tree")
 		os.Exit(0)
 	}
 
@@ -51,6 +52,8 @@ func Main(args []string) {
 		findKindTrees(fileName, operationsCmd.Args(), *directory, *recursive)
 	case "pretty-print":
 		prettyPrint(fileName, operationsCmd.Args(), *directory, *recursive)
+	case "create-cfg":
+		createCfg(fileName, operationsCmd.Args(), *directory, *recursive)
 	default:
 		fmt.Println("Please provide a valid operation. Type --help for more information")
 		os.Exit(1)
