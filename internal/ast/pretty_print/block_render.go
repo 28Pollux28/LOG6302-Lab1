@@ -44,6 +44,85 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: ReferenceModifierBlockType,
 			}
 		},
+		"function_static_declaration": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case StaticBlockType, CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    append(result, NEWLINE_BLOCK),
+				BlockType: FunctionStaticDeclarationBlockType,
+			}
+		},
+		"static_variable_declaration": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case EqualsBlockType:
+					result = append(result, WHITESPACE_BLOCK, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: StaticVariableDeclarationBlockType,
+			}
+		},
+		"global_declaration": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case GlobalBlockType, CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks: append(result, NEWLINE_BLOCK),
+			}
+		},
+		"qualified_name": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    joinBlocks(blocks, BACKSLASH_BLOCK),
+				BlockType: QualifiedNameBlockType,
+			}
+		},
+		"namespace_name": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: NamespaceNameBlockType,
+			}
+		},
+		"interface_declaration": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case InterfaceBlockType, ExtendsBlockType, CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case DeclarationListBlockType:
+					result = append(result, WHITESPACE_BLOCK, block)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    append(result, NEWLINE_BLOCK),
+				BlockType: InterfaceDeclarationBlockType,
+			}
+		},
 		"base_clause": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			var result []IBlock
@@ -297,6 +376,38 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 					NEWLINE_BLOCK,
 				),
 				BlockType: FunctionDefinitionBlockType,
+			}
+		},
+		"anonymous_function": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case FunctionBlockType, StaticModifierBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case CompoundStatementBlockType, AnonymousFunctionUseClauseBlockType:
+					result = append(result, WHITESPACE_BLOCK, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: AnonymousFunctionBlockType,
+			}
+		},
+		"anonymous_function_use_clause": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case UseBlockType, CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: AnonymousFunctionUseClauseBlockType,
 			}
 		},
 		"formal_parameters": func(s *utils.Stack, n Node) IBlock {
@@ -1188,6 +1299,13 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: ParenthesizedExpressionBlockType,
 			}
 		},
+		"class_constant_access_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: ClassConstantAccessExpressionBlockType,
+			}
+		},
 		"print_intrinsic": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
@@ -1293,6 +1411,24 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: ScopedPropertyAccessExpressionBlockType,
 			}
 		},
+		"list_literal": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case CommaBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case ArrowFunctionSequenceBlockType:
+					result = append(result, WHITESPACE_BLOCK, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: ListLiteralBlockType,
+			}
+		},
 		"function_call_expression": func(s *utils.Stack, n Node) IBlock {
 			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
 			return &HorizontalBlock{
@@ -1356,6 +1492,33 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: NullsafeMemberCallExpressionBlockType,
+			}
+		},
+		"variadic_unpacking": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: VariadicUnpackingBlockType,
+			}
+		},
+		"array_creation_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for i, block := range blocks {
+				switch block.Type() {
+				case CommaBlockType:
+					if i != len(blocks)-2 {
+						result = append(result, block, WHITESPACE_BLOCK)
+					} else {
+						result = append(result, block)
+					}
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: ArrayCreationExpressionBlockType,
 			}
 		},
 		"escape_sequence": func(s *utils.Stack, n Node) IBlock {
@@ -1441,10 +1604,35 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 				BlockType: HeredocEndBlockType,
 			}
 		},
+		"shell_command_expression": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			return &HorizontalBlock{
+				Blocks:    blocks,
+				BlockType: ShellCommandExpressionBlockType,
+			}
+		},
 		"boolean": func(s *utils.Stack, n Node) IBlock {
 			return &PrimitiveBlock{
 				Content:   n.GetText(),
 				BlockType: BooleanBlockType,
+			}
+		},
+		"dynamic_variable_name": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case OpenBraceBlockType:
+					result = append(result, block, WHITESPACE_BLOCK)
+				case CloseBraceBlockType:
+					result = append(result, WHITESPACE_BLOCK, block)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: DynamicVariableNameBlockType,
 			}
 		},
 		"variable_name": func(s *utils.Stack, n Node) IBlock {
@@ -1459,6 +1647,22 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: ByRefBlockType,
+			}
+		},
+		"array_element_initializer": func(s *utils.Stack, n Node) IBlock {
+			blocks := PopBlocksFromStack(s, n.GetChildrenNumber())
+			var result []IBlock
+			for _, block := range blocks {
+				switch block.Type() {
+				case ArrowFunctionSequenceBlockType:
+					result = append(result, WHITESPACE_BLOCK, block, WHITESPACE_BLOCK)
+				default:
+					result = append(result, block)
+				}
+			}
+			return &HorizontalBlock{
+				Blocks:    result,
+				BlockType: ArrayElementInitializerBlockType,
 			}
 		},
 		"binary_expression": func(s *utils.Stack, n Node) IBlock {
@@ -1513,6 +1717,13 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			return &HorizontalBlock{
 				Blocks:    blocks,
 				BlockType: SubscriptExpressionBlockType,
+			}
+		},
+		"ERROR": func(s *utils.Stack, n Node) IBlock {
+			content := "//An error occurred while parsing the following code\n" + n.GetText()
+			return &PrimitiveBlock{
+				Content:   content,
+				BlockType: ErrorBlockType,
 			}
 		},
 	}

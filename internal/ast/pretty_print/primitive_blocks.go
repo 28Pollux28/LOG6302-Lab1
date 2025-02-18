@@ -159,6 +159,7 @@ var (
 	REQUIRE_BLOCK                 = &PrimitiveBlock{Content: "require", BlockType: RequireBlockType}
 	REQUIRE_ONCE_BLOCK            = &PrimitiveBlock{Content: "require_once", BlockType: RequireOnceBlockType}
 	HASHTAG_BLOCK                 = &PrimitiveBlock{Content: "#", BlockType: HashtagBlockType}
+	LIST_BLOCK                    = &PrimitiveBlock{Content: "list", BlockType: ListBlockType}
 )
 
 func GetPrimitiveBlockRenders() map[string]func(*utils.Stack, Node) IBlock {
@@ -622,6 +623,9 @@ func GetPrimitiveBlockRenders() map[string]func(*utils.Stack, Node) IBlock {
 		},
 		"#": func(s *utils.Stack, n Node) IBlock {
 			return HASHTAG_BLOCK
+		},
+		"list": func(s *utils.Stack, n Node) IBlock {
+			return LIST_BLOCK
 		},
 	}
 }
