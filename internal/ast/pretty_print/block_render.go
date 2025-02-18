@@ -1720,7 +1720,7 @@ func GetRenders() map[string]func(*utils.Stack, Node) IBlock {
 			}
 		},
 		"ERROR": func(s *utils.Stack, n Node) IBlock {
-			content := "//An error occurred while parsing the following code\n" + n.GetText()
+			content := "/*An error occurred while parsing the following code*/\n" + n.GetText()
 			return &PrimitiveBlock{
 				Content:   content,
 				BlockType: ErrorBlockType,
