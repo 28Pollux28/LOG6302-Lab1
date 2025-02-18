@@ -25,6 +25,7 @@ func Main(args []string) {
 		fmt.Println("  count-kinds - Count the number of nodes of multiple kinds")
 		fmt.Println("  find-kind-tree - Find the tree of nodes of a specific kind")
 		fmt.Println("  find-kind-trees - Find the trees of nodes of a specific kind")
+		fmt.Println("  create-cfg - Create a CFG from the AST tree")
 		os.Exit(0)
 	}
 
@@ -48,6 +49,8 @@ func Main(args []string) {
 		findKindTree(fileName, operationsCmd.Args(), *directory, *recursive)
 	case "find-kind-trees":
 		findKindTrees(fileName, operationsCmd.Args(), *directory, *recursive)
+	case "create-cfg":
+		createCfg(fileName, operationsCmd.Args(), *directory, *recursive)
 	default:
 		fmt.Println("Please provide a valid operation. Type --help for more information")
 		os.Exit(1)
