@@ -2,9 +2,10 @@ package ast
 
 import (
 	"fmt"
+	"maps"
+
 	"github.com/28Pollux28/log6302-parser/internal/ast/pretty_print"
 	"github.com/28Pollux28/log6302-parser/utils"
-	"maps"
 )
 
 type PrettyPrintVisitor struct {

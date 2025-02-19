@@ -81,13 +81,8 @@ func (cfg *CFG) SetFuncScope(node *CFGNode, scope int) {
 }
 
 func (cfg *CFG) AddEdge(from, to *CFGNode, edgeType string) {
-	if from == nil {
-		to.SetDead(true)
-		return
-	}
-
 	// if all parents are dead, then the node is dead
-	if from.IsDead {
+	if from == nil || from.IsDead {
 		isDead := true
 		for _, parent := range to.Parents {
 			if !parent.From.IsDead {
@@ -98,6 +93,10 @@ func (cfg *CFG) AddEdge(from, to *CFGNode, edgeType string) {
 		to.SetDead(isDead)
 	} else {
 		to.SetDead(false)
+	}
+
+	if from == nil {
+		return
 	}
 	edge := &CFGEdge{
 		From: from,
@@ -143,4 +142,17 @@ func (cfg *CFG) GenerateDOT() string {
 	builder.WriteString("}\n")
 
 	return builder.String()
+}
+
+func (cfg *CFG) CheckDeadCodeIntra() bool {
+	deadCode := false
+	for _, node := range cfg.Nodes {
+		if node.IsDead && !node.IsSpread {
+			deadCode = true
+			fmt.Println("Dead code found in node", node.ID, node.Label)
+			break
+		}
+	}
+	return deadCode
+
 }

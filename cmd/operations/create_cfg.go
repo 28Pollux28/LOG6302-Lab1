@@ -61,6 +61,7 @@ func createCfgDir(directory, outputFile string, recursive bool, wg *sync.WaitGro
 		wg.Add(1)
 		go func(fileName, outputFile string) {
 			defer wg.Done()
+			// println(fileName)
 			createCfgFile(fileName, outputFile)
 		}(directory+"/"+file.Name(), outputFile+"/"+file.Name())
 
@@ -81,7 +82,7 @@ func createCfgFile(fileName, outputFile string) {
 		os.Exit(1)
 	}
 
-	cfg := ast.BuildCFGFromAST(&treeNode)
+	cfg := ast.BuildCFGFromAST(&treeNode, true)
 	if outputFile != "" {
 		outputFile = strings.TrimSuffix(outputFile, "php.ast.json")
 		if !strings.HasSuffix(outputFile, ".dot") {
@@ -111,5 +112,7 @@ func createCfgFile(fileName, outputFile string) {
 		fmt.Println(cfg.GenerateDOT())
 
 	}
-
+	if cfg.CheckDeadCodeIntra() {
+		fmt.Println("Dead code detected intra-procedurally in file", fileName)
+	}
 }

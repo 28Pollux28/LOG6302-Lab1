@@ -34,6 +34,13 @@ func (s *Stack) Peek() Item {
 	return s.items[len(s.items)-1]
 }
 
+func (s *Stack) PeekAt(index int) Item {
+	if s.IsEmpty() {
+		return nil
+	}
+	return s.items[len(s.items)-1-index]
+}
+
 func (s *Stack) IsEmpty() bool {
 	return len(s.items) == 0
 }

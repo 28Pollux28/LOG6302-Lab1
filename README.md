@@ -125,6 +125,19 @@ go-php-parser operations --directory --recursive ./data/directory pretty-print -
 
 ```
 
+#### CFG
+The create-cfg operation allows you to create a CFG from the AST JSON file. Besides, it will detect dead code.
+```bash
+# Create the CFG from an AST JSON file
+# Use --directory to specify a directory instead of a file and --recursive to search recursively in the directory
+# Use --output to specify a file to write the output to or a directory when using --directory
+go-php-parser operations ./output/file.ast.json create-cfg
+go-php-parser operations --directory --recursive ./data/directory create-cfg
+go-php-parser operations ./output/file.ast.json create-cfg --output ./output/file.php
+go-php-parser operations --directory --recursive ./data/directory create-cfg --output ./output/directory
+
+```
+
 ## Contributors
 - [Valentin Lemaire](https://github.com/28Pollux28)
 - [Mattéo Ricard](https://github.com/RicardMatteo)
